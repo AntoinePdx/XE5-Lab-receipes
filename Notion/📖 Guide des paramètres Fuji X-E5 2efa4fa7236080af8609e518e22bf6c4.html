@@ -1,0 +1,743 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>📖 Guide des paramètres Fuji X-E5 </title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="2efa4fa7-2360-80af-8609-e518e22bf6c4" class="page sans"><header><h1 class="page-title" dir="auto">📖 Guide des paramètres Fuji X-E5 </h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><h1 id="2efa4fa7-2360-81a2-919d-eef18f655e49" class="">📖 Guide des paramètres Fuji X-E5</h1></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8163-a8e7-ca0f2d66e23c" class="">Ce guide explique chaque paramètre disponible dans les recettes Fuji pour le X-E5 et leur impact sur le rendu final de vos photos.</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81a4-9b98-feafdd9b0f88"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81c4-9618-f3b189dae920" class="">🎞️ Film Simulation</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81dd-be89-c13347748c44" class="">Les simulations de films reproduisent le rendu des pellicules argentiques Fujifilm. C’est le réglage le plus important qui définit le caractère général de l’image.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81d2-904a-dd41a4ed6ad2" class=""><strong>Provia (Standard)</strong> : Rendu équilibré et polyvalent, couleurs naturelles</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8163-94c2-dc8d3a36e167" class=""><strong>Velvia (Vivid)</strong> : Couleurs saturées et contrastées, idéal pour les paysages</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81f9-a2c3-e58a0e45c980" class=""><strong>Astia (Soft)</strong> : Tons doux et pastels, parfait pour les portraits</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81af-9996-de98d2cca76a" class=""><strong>Classic Chrome</strong> : Look désaturé et contrasté, ambiance cinématographique</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81f1-b6c4-e43b2f9a885a" class=""><strong>Reala Ace</strong> : Rendu moderne avec des tons chair fidèles</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81e1-acc2-dd5039541b61" class=""><strong>Pro Neg Hi</strong> : Contraste élevé pour le portrait en studio</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-816b-967a-ee238e8eb32a" class=""><strong>Pro Neg Std</strong> : Contraste modéré, tons chair neutres</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-819b-a159-ff071592478f" class=""><strong>Classic Neg</strong> : Couleurs vintage, tons fauves et chaleureux</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-812e-af28-dc00c605faca" class=""><strong>Nostalgic Neg</strong> : Ambiance nostalgique avec teintes sépia/ambrées</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-816b-939b-df890174fd0e" class=""><strong>Eterna</strong> : Palette cinéma avec ombres denses, pour la vidéo</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81dc-be2f-cf2df317c8c7" class=""><strong>Eterna Bleach Bypass</strong> : Look délavé et désaturé, très contrasté</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8130-a911-cbb2803d9aae" class=""><strong>Acros</strong> : Noir et blanc avec gradation douce et grain argentique</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8123-acb1-e38c5528e7bd" class=""><strong>Monochrome</strong> : Noir et blanc standard avec contraste neutre</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-817d-86bd-db8c761ef500" class=""><strong>Sepia</strong> : Noir et blanc avec teinte sépia pour un effet vintage</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81dd-97dd-ed095ef82213"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81b7-8aaf-d9f9a605c840" class="">🔘 Grain Effect &amp; Grain Size</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8184-9a96-ee8d43e105b3" class=""><strong>Grain Effect</strong> ajoute un grain artificiel qui imite la pellicule argentique.</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-818a-95d9-eedfc6a42fa5" class="bulleted-list"><li style="list-style-type:disc"><strong>Off</strong> : Aucun grain</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8100-95bc-e6008da50326" class="bulleted-list"><li style="list-style-type:disc"><strong>Weak</strong> : Grain subtil pour un look organique</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8131-b34b-cb05c691177e" class="bulleted-list"><li style="list-style-type:disc"><strong>Strong</strong> : Grain prononcé pour un effet argentique marqué</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81b0-bbb4-c6422c8250d0" class=""><strong>Grain Size</strong> détermine la taille des grains.</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8115-be2d-c286ce3c5ae0" class="bulleted-list"><li style="list-style-type:disc"><strong>Small</strong> : Grain fin, plus discret</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-81b9-bf0c-cc9f43d1195a" class="bulleted-list"><li style="list-style-type:disc"><strong>Large</strong> : Grain épais, plus visible et expressif</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8118-b473-dfa06d7e559c" class=""><strong>Impact</strong> : Ajoute du caractère et de la texture, réduit le “look numérique”</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81bd-97f1-e0d1bcb01ab8"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81e2-b990-ffd7cd37944e" class="">🌈 Color Chrome Effect</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-810e-860d-c78487e5e84e" class="">Renforce la profondeur et la richesse des couleurs saturées sans affecter les tons moyens.</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8115-8c33-e9e92c1d5ffe" class="bulleted-list"><li style="list-style-type:disc"><strong>Off</strong> : Pas d’effet</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8171-b9f8-d16bc16b4081" class="bulleted-list"><li style="list-style-type:disc"><strong>Weak</strong> : Amélioration subtile des couleurs riches</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-81af-a188-e24a1dadf1d4" class="bulleted-list"><li style="list-style-type:disc"><strong>Strong</strong> : Couleurs saturées plus profondes et dimensionnelles</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8177-a844-d7fd108bcc17" class=""><strong>Impact</strong> : Évite que les rouges et bleus saturés ne paraissent plats</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-819c-a0c3-e612377169a5"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-810f-bc5b-d598d45579a0" class="">💙 Color Chrome FX Blue</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-819b-a157-cab3d7f49c64" class="">Variante spécifique pour enrichir les tons bleus (ciels, eau).</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8100-b84f-d7fe8db0af0a" class="bulleted-list"><li style="list-style-type:disc"><strong>Off</strong> : Pas d’effet</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8118-9ece-d4ee56d4526b" class="bulleted-list"><li style="list-style-type:disc"><strong>Weak</strong> : Bleus légèrement plus profonds</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-814b-9829-e4de86f1b0b0" class="bulleted-list"><li style="list-style-type:disc"><strong>Strong</strong> : Bleus riches et saturés</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8104-92b3-f479fc25307b" class=""><strong>Impact</strong> : Idéal pour les paysages avec ciel bleu ou scènes marines</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-813f-8243-da392a1be544"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-810d-907e-ddf1b65bbdc7" class="">👤 Smooth Skin Effect</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8152-bc6d-e77750815cc2" class="">Lisse automatiquement les textures de peau pour les portraits.</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8191-8199-c8c080e49009" class="bulleted-list"><li style="list-style-type:disc"><strong>Off</strong> : Pas de lissage</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8165-a445-eec9183a82b7" class="bulleted-list"><li style="list-style-type:disc"><strong>Weak</strong> : Lissage discret, texture naturelle conservée</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8169-b1fe-e2a1d3962260" class="bulleted-list"><li style="list-style-type:disc"><strong>Strong</strong> : Lissage prononcé, peau très douce</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8184-9778-d07f5f9e5886" class=""><strong>Impact</strong> : À utiliser avec modération pour éviter un effet “plastique”</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81b0-877a-ed27596590a1"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-8110-acd9-fb416a2e624a" class="">⚖️ White Balance (Balance des Blancs)</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81b1-ad45-cf23573dbdab" class="">Définit la température de couleur de base de l’image.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8180-ab9e-f177b955c268" class=""><strong>Auto</strong> : Détection automatique standard</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8150-92ea-ca6c60dc758c" class=""><strong>Auto white pro</strong> : Auto avancé qui préserve les ambiances chaudes</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-817e-986b-f263c6328ce7" class=""><strong>Auto ambiance pro</strong> : Préserve encore plus les ambiances colorées</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8193-a19b-e367432fb074" class=""><strong>Daylight</strong> : ~5200K, lumière du jour neutre</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8154-92b3-d5f47e35e501" class=""><strong>Shade</strong> : ~7000K, pour l’ombre (plus chaud)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8129-9e12-df6ce8222b9e" class=""><strong>Fluorescent</strong> : ~4000K, éclairage néon</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81f5-a2ea-d3afbce946e7" class=""><strong>Incandescent</strong> : ~2850K, ampoules tungstène</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81a9-9063-f6b0bfd69c3b"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-818d-85cc-c128b306829a" class="">🔵🔴 Shift Blue &amp; Shift Red</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8173-a289-d9077d2c02a0" class="">Ajustements fins de la balance des blancs sur les axes bleu-ambre et rouge-vert.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-817b-b2de-c568811042a6" class=""><strong>Shift Blue</strong> : De -6 (plus ambre/chaud) à +6 (plus bleu/froid)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8134-8d8f-e13fac0203fc" class=""><strong>Shift Red</strong> : De -6 (plus vert) à +6 (plus magenta)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81b3-9a23-db41a4d77f95" class=""><strong>Impact</strong> : Permet de créer des ambiances colorées ou corriger des dominantes</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81f7-8945-caf189e9a94a"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81bd-8821-cafa44d75d46" class="">📊 Dynamic Range</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-819f-b337-f68b2e3ff095" class="">Étend la plage dynamique pour préserver détails dans les hautes et basses lumières.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-814c-bdd5-d05ff7c7d0de" class=""><strong>Auto</strong> : Ajustement automatique selon la scène</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8170-a35c-ce021bbcc841" class=""><strong>DR100</strong> : Plage standard (ISO minimum 160)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8129-9f3a-c13a6f235d57" class=""><strong>DR200</strong> : Plage étendue +1 IL (ISO minimum 320)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81b8-b7ff-f33135abd51d" class=""><strong>DR400</strong> : Plage très étendue +2 IL (ISO minimum 640)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-817d-8dba-c30cae753d85" class=""><strong>Impact</strong> : Réduit les zones brûlées et bouchées, mais augmente l’ISO de base</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81b8-b073-c32597446def"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-8113-9a64-d4233db2f171" class="">🔆 D-Range Priority</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8144-a5a7-c26b745578cf" class="">Optimisation automatique de la plage dynamique.</p></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-81c4-956d-d2a9450c3473" class="bulleted-list"><li style="list-style-type:disc"><strong>Off</strong> : Pas d’optimisation auto</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-8100-bd72-f0b8358a8488" class="bulleted-list"><li style="list-style-type:disc"><strong>Weak</strong> : Légère protection des hautes lumières</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-81c3-aced-ead6b80c6b90" class="bulleted-list"><li style="list-style-type:disc"><strong>Strong</strong> : Protection maximale</li></ul></div><div style="display:contents" dir="auto"><ul id="2efa4fa7-2360-81fb-9393-d5fb1f0b1871" class="bulleted-list"><li style="list-style-type:disc"><strong>Auto</strong> : Le boîtier décide</li></ul></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8189-80c9-d7d2c48748e7" class=""><strong>Impact</strong> : Complémentaire au Dynamic Range pour scènes contrastées</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-817f-9b9f-de2209ec58a2"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81d4-b88b-fdd4436f8571" class="">☀️ Highlights</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-815d-b0ce-ef024f236566" class="">Ajuste la luminosité des zones claires.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81fe-9031-ef3cb81f76d4" class="">De -2 (assombrit) à +4 (éclaircit)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8122-b9b5-fbadc9d5b340" class=""><strong>Valeurs négatives</strong> : Récupère les détails dans les hautes lumières</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81f3-9c29-fd96d536dcb9" class=""><strong>Valeurs positives</strong> : Éclaircit les zones lumineuses</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-812e-af0d-c5efda4585af" class=""><strong>Impact</strong> : Contrôle précis des tons clairs et du contraste</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-817f-a556-c8f632e3c2cf"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-812b-8be4-f007add69df0" class="">🌑 Shadows</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8173-b98f-ce9999bb8e18" class="">Ajuste la luminosité des zones sombres.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8103-8aa0-cdad4dee0b77" class="">De -2 (assombrit) à +4 (éclaircit)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8163-8c7f-c63925c8a3ce" class=""><strong>Valeurs négatives</strong> : Ombres plus denses, contraste accru</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8173-a88a-fab189b4df8d" class=""><strong>Valeurs positives</strong> : Débouche les ombres, révèle les détails</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81e1-a472-f963ef4d0640" class=""><strong>Impact</strong> : Contrôle des tons foncés et de l’atmosphère générale</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-8148-9a2c-f6d5368ac335"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81cf-8a0d-e5feb22cdf10" class="">🎨 Color (Saturation)</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81db-a5d7-f5c3a9addbc9" class="">Intensité des couleurs.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8100-a9c3-de99a17d7a47" class="">De -4 (désaturé) à +4 (très saturé)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81c4-b88b-f24d9aa954b3" class=""><strong>Valeurs négatives</strong> : Look délavé, palette sourde</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8171-9758-e0185bfc05ef" class=""><strong>Valeurs positives</strong> : Couleurs vives et punchy</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8173-afc7-decbcdd64fb5" class=""><strong>Impact</strong> : Définit l’intensité colorimétrique globale</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81f1-a390-c8eaccccc680"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-815f-bded-f66b886c2d40" class="">🔪 Sharpness (Netteté)</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8188-8eb2-e198e8f9504c" class="">Accentuation des contours.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8164-a8c5-dc5447d85db0" class="">De -4 (doux) à +4 (très net)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-818f-959d-e5eb03540afb" class=""><strong>Valeurs négatives</strong> : Image plus douce, moins de détails</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81a3-9af7-cb2264d56187" class=""><strong>Valeurs positives</strong> : Contours accentués, détails prononcés</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81e7-99a1-e3047c4c5ab9" class=""><strong>Impact</strong> : Attention à ne pas exagérer (halos, artefacts)</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81cd-a46b-f5c878db59b1"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-8168-b146-e57f102be517" class="">🌃 High ISO NR (Réduction du bruit)</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81d1-be89-dd0c3677e1a8" class="">Réduction du bruit numérique en hauts ISO.</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-816d-a906-ed09cece91e5" class="">De -4 (bruit maximum) à +4 (réduction maximale)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81be-a12f-f4e051daf495" class=""><strong>Valeurs négatives</strong> : Préserve les détails, mais plus de bruit</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81c1-a37f-e88df11da3e9" class=""><strong>Valeurs positives</strong> : Image plus propre, mais peut lisser les détails</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-810c-9752-f14ab2a1961e" class=""><strong>Impact</strong> : À ajuster selon l’ISO utilisé et le rendu souhaité</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-81af-ad95-f2a93cec4d98"/></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81a1-a6a8-f161043e1b74" class="">✨ Clarity</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81cc-ac65-f7268aee326b" class="">Contraste local des tons moyens (micro-contraste).</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8142-970d-cdc2ef9a0db1" class="">De -5 (doux) à +5 (très défini)</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8198-99a6-d4ac6e56b653" class=""><strong>Valeurs négatives</strong> : Look doux, atmosphérique, brumeux</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81a8-b1a0-d589982a187c" class=""><strong>Valeurs positives</strong> : Punch, définition, effet HDR léger</p></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-810b-be7f-e4d05d63397a" class=""><strong>Impact</strong> : Très puissant pour donner du caractère à une image</p></div><div style="display:contents" dir="auto"><hr id="2efa4fa7-2360-8138-a283-de1270a59c82"/></div><div style="display:contents" dir="auto"><h2 id="2efa4fa7-2360-81a7-a104-dfc8b281ca51" class="">💡 Conseils d’utilisation</h2></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-8122-a3dc-d5ce34c13fc1" class="">Pour la Street Photography</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8147-82fd-c0b788a8d70e" class="">Privilégiez Classic Chrome ou Acros avec un Clarity modéré (+1 à +2) et des Shadows légèrement relevées pour garder des détails dans les zones sombres.</p></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81dd-97a2-c6f56e4c4078" class="">Pour le Portrait</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81e0-a40a-f2ad1bfff524" class="">Utilisez Astia ou Pro Neg Std avec Smooth Skin Effect en Weak, Clarity négatif (-1 à -2) pour un rendu doux, et évitez les Sharpness trop élevés.</p></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-8149-b961-e5b356a04649" class="">Pour le Paysage</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8158-a94b-d0e65ddfd570" class="">Velvia ou Provia avec Color Chrome Effect Strong, Clarity positif (+2 à +3), et un bon équilibre Highlights/Shadows pour préserver la dynamique.</p></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-810e-a0c4-c6acbfd8fc35" class="">Pour un look Vintage</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-81bf-ba40-ff65416aeeb0" class="">Classic Neg ou Nostalgic Neg avec Grain Effect Strong (Large), Color légèrement réduit, et Clarity négatif.</p></div><div style="display:contents" dir="auto"><h3 id="2efa4fa7-2360-81d1-b490-faaaea3e01a3" class="">Pour le Noir &amp; Blanc</h3></div><div style="display:contents" dir="auto"><p id="2efa4fa7-2360-8100-848c-dd72705df230" class="">Acros avec Grain Effect (Small ou Large selon le style), jouez avec Highlights/Shadows pour le contraste, et utilisez les filtres de couleur (Red/Blue shift) pour modifier les tons.</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

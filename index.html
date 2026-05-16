@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Fuji XE5 Recipes</title>
+    <meta name="description" content="Mini-app mobile pour gerer des recettes Fujifilm X-E5.">
+    <link rel="apple-touch-icon" href="Image%20(9).jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --paper: #efe3cf;
+            --card: rgba(255, 248, 236, 0.92);
+            --ink: #201b17;
+            --muted: #776a5f;
+            --line: rgba(32, 27, 23, 0.12);
+            --burnt: #b64b2d;
+            --dark: #221d19;
+            --cream: #fffaf0;
+            --shadow: 0 12px 30px rgba(66, 42, 20, 0.12);
+            --danger: #5e2d23;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(90deg, rgba(32, 27, 23, 0.035) 1px, transparent 1px),
+                linear-gradient(rgba(32, 27, 23, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 90% 0%, rgba(182, 75, 45, 0.16), transparent 28%),
+                linear-gradient(180deg, #f4eadb 0%, var(--paper) 100%);
+            background-size: 22px 22px, 22px 22px, auto, auto;
+            color: var(--ink);
+            font-family: "IBM Plex Sans", system-ui, sans-serif;
+        }
+
+        button, input, select, textarea { font: inherit; }
+        button { -webkit-tap-highlight-color: transparent; }
+
+        .app {
+            width: min(100%, 860px);
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: max(10px, env(safe-area-inset-top)) 10px calc(86px + env(safe-area-inset-bottom));
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0 12px;
+            backdrop-filter: blur(16px);
+        }
+
+        .title-wrap small {
+            display: block;
+            color: var(--muted);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .title-wrap strong {
+            font-family: "Fraunces", serif;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .top-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-pill, .stat-pill {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 7px 10px;
+            background: rgba(255, 250, 240, 0.74);
+            color: var(--muted);
+            font-size: 0.76rem;
+            white-space: nowrap;
+        }
+
+        .sync-pill { display: none; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .panel {
+            margin-top: 8px;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .section-head h2 { margin: 0; font-family: "Fraunces", serif; font-size: 1.16rem; }
+        .section-head span { color: var(--muted); font-size: 0.78rem; }
+
+        .search-box, .form-grid { display: grid; gap: 10px; }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            outline: none;
+            background: rgba(255, 253, 248, 0.94);
+            color: var(--ink);
+            padding: 11px 12px;
+        }
+
+        .field textarea { min-height: 82px; resize: vertical; }
+
+        .field label {
+            display: block;
+            margin: 0 0 5px;
+            color: var(--muted);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hint {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.73rem;
+        }
+
+        .filter-grid, .two-col, .form-actions, .photo-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .form-actions {
+            margin-top: 8px;
+            grid-template-columns: 1fr;
+        }
+
+        .chip-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+
+        .chip-row::-webkit-scrollbar { display: none; }
+
+        .chip {
+            min-height: 36px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0 12px;
+            background: rgba(255, 253, 248, 0.78);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .chip.active { border-color: rgba(182, 75, 45, 0.38); background: var(--burnt); color: var(--cream); }
+
+        .recipe-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .recipe-card {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: visible;
+            background: rgba(255, 253, 248, 0.92);
+            box-shadow: 0 10px 24px rgba(66, 42, 20, 0.08);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .recipe-summary {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 9px;
+            cursor: grab;
+            list-style: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .recipe-list.is-dragging .recipe-summary { cursor: grabbing; }
+
+        .summary-photo {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            width: 100%;
+            height: clamp(160px, 34vw, 230px);
+            border-radius: 13px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #3b3029, #c98b5d);
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(32, 27, 23, 0.18);
+        }
+
+        .summary-photo.single { grid-template-columns: 1fr; }
+        .summary-photo.double { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .summary-photo.triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+        .summary-photo img {
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            object-fit: cover;
+            display: block;
+        }
+
+        .summary-photo img + img { border-left: 1px solid rgba(255, 250, 240, 0.35); }
+
+        .photo-count-badge {
+            position: absolute;
+            right: 6px;
+            bottom: 6px;
+            min-width: 34px;
+            border-radius: 999px;
+            padding: 2px 7px;
+            background: rgba(32, 27, 23, 0.58);
+            color: rgba(255, 250, 240, 0.96);
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .summary-main h3 {
+            margin: 0;
+            padding-right: 38px;
+            font-size: 1.08rem;
+            line-height: 1.2;
+        }
+
+        .summary-meta {
+            margin: 7px 0 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .meta-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid rgba(32, 27, 23, 0.12);
+            border-radius: 999px;
+            padding: 2px;
+            background: rgba(32, 27, 23, 0.05);
+        }
+
+        .meta-control.has-value { padding: 0; background: transparent; border-color: transparent; }
+
+        .meta-label {
+            padding-left: 8px;
+            color: var(--muted);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        .meta-tag {
+            min-height: 28px;
+            border: 1px solid rgba(32, 27, 23, 0.14);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            color: var(--ink);
+            padding: 0 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+        }
+
+        .meta-tag:active { transform: scale(0.98); }
+
+        .meta-tag.slot-fs1 {
+            border-color: rgba(0, 118, 176, 0.38);
+            background: rgba(0, 118, 176, 0.14);
+            color: #0a4c6d;
+        }
+
+        .meta-tag.slot-fs2 {
+            border-color: rgba(36, 138, 73, 0.38);
+            background: rgba(36, 138, 73, 0.14);
+            color: #1f5f36;
+        }
+
+        .meta-tag.slot-fs3 {
+            border-color: rgba(165, 97, 0, 0.38);
+            background: rgba(165, 97, 0, 0.16);
+            color: #7a4600;
+        }
+
+        .meta-control.is-muted {
+            opacity: 0.42;
+            background: rgba(32, 27, 23, 0.03);
+        }
+
+        .summary-comment {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.38;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-menu {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 2;
+        }
+
+        .menu-toggle {
+            min-width: 34px;
+            min-height: 34px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            min-width: 130px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255, 253, 248, 0.98);
+            box-shadow: var(--shadow);
+        }
+
+        .menu-dropdown.open { display: grid; }
+
+        .menu-dropdown button {
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            padding: 9px 10px;
+            background: transparent;
+            color: var(--ink);
+        }
+
+        .menu-dropdown button:last-child { border-bottom: 0; color: var(--danger); }
+
+        .recipe-list.is-dragging .recipe-card {
+            transition: box-shadow 120ms ease, background-color 120ms ease;
+        }
+
+        .recipe-card.dragging {
+            opacity: 0.96;
+            border-color: rgba(182, 75, 45, 0.38);
+            box-shadow: 0 22px 48px rgba(66, 42, 20, 0.26);
+            cursor: grabbing;
+        }
+
+        .recipe-card.drop-target {
+            background: rgba(182, 75, 45, 0.08);
+            box-shadow: 0 0 0 2px rgba(182, 75, 45, 0.26) inset;
+        }
+
+        .recipe-drag-placeholder {
+            border: 2px dashed rgba(182, 75, 45, 0.42);
+            border-radius: 16px;
+            background: rgba(182, 75, 45, 0.08);
+            transition: height 120ms ease, margin 120ms ease;
+        }
+
+        .action-btn, .primary-btn, .danger-btn {
+            min-height: 44px;
+            border: 0;
+            border-radius: 14px;
+            padding: 0 12px;
+            font-weight: 700;
+        }
+
+        .action-btn { background: rgba(32, 27, 23, 0.08); color: var(--ink); }
+        .primary-btn { background: var(--burnt); color: var(--cream); }
+        .danger-btn { background: var(--danger); color: var(--cream); }
+
+        .upload-note {
+            margin-top: 6px;
+            min-height: 18px;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .upload-note.error { color: #9c2f1b; }
+        .upload-note.ok { color: #225b2b; }
+
+        .empty {
+            padding: 20px;
+            border: 1px dashed var(--line);
+            border-radius: 16px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .recipe-sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: none;
+            background: var(--cream);
+            padding: 0;
+        }
+
+        .recipe-sheet.open { display: block; }
+
+        .recipe-sheet-card {
+            height: 100%;
+            background: var(--cream);
+            border-radius: 0;
+            border: 0;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .sheet-head {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 253, 248, 0.96);
+        }
+
+        .sheet-head > div {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sheet-head h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+
+        .sheet-sub {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .sheet-sub span {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 2px 8px;
+            background: rgba(32, 27, 23, 0.05);
+        }
+
+        .sheet-close {
+            min-width: 38px;
+            min-height: 38px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--muted);
+            font-size: 1.12rem;
+        }
+
+        .sheet-body {
+            overflow: auto;
+            padding: 10px 10px calc(20px + env(safe-area-inset-bottom));
+            display: grid;
+            gap: 9px;
+            align-content: start;
+        }
+
+        .sheet-photos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+            gap: 8px;
+        }
+
+        .sheet-photo {
+            position: relative;
+            margin: 0;
+            min-height: 112px;
+            aspect-ratio: 4 / 3;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #3b3029, #c98b5d);
+        }
+
+        .sheet-photo.empty {
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(59, 48, 41, 0.9), rgba(201, 139, 93, 0.9));
+            color: rgba(255, 250, 240, 0.9);
+            font-size: 0.82rem;
+        }
+
+        .sheet-photo img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .photo-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            min-width: 30px;
+            min-height: 30px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 250, 240, 0.34);
+            background: rgba(32, 27, 23, 0.4);
+            color: rgba(255, 250, 240, 0.95);
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .sheet-photo-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sheet-photo-tools span {
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .editor-photos {
+            margin-top: -2px;
+        }
+
+        .sheet-inline-input, .sheet-inline-select, .sheet-inline-textarea {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255, 253, 248, 0.96);
+            color: var(--ink);
+            padding: 8px 9px;
+            font-size: 0.86rem;
+        }
+
+        .sheet-inline-select {
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, rgba(32, 27, 23, 0.66) 50%),
+                linear-gradient(135deg, rgba(32, 27, 23, 0.66) 50%, transparent 50%);
+            background-position:
+                calc(100% - 16px) calc(50% - 2px),
+                calc(100% - 10px) calc(50% - 2px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 32px;
+        }
+
+        .sheet-inline-input:focus,
+        .sheet-inline-select:focus,
+        .sheet-inline-textarea:focus {
+            outline: none;
+            border-color: rgba(182, 75, 45, 0.6);
+            box-shadow: 0 0 0 2px rgba(182, 75, 45, 0.14);
+        }
+
+        .sheet-inline-input.sheet-title-input {
+            min-height: 34px;
+            border-color: transparent;
+            background: transparent;
+            padding: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .sheet-inline-textarea { min-height: 72px; resize: vertical; }
+
+        .sheet-field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .sheet-field label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.61rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .sheet-field {
+            border: 1px solid rgba(32, 27, 23, 0.08);
+            border-radius: 12px;
+            padding: 8px;
+            background: rgba(255, 254, 251, 0.7);
+        }
+
+        .tabbar {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            z-index: 50;
+            width: min(100%, 860px);
+            transform: translateX(-50%);
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: rgba(239, 227, 207, 0.78);
+            backdrop-filter: blur(22px);
+        }
+
+        .tabbar-inner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 20px;
+            background: rgba(34, 29, 25, 0.9);
+            box-shadow: 0 16px 34px rgba(32, 27, 23, 0.22);
+        }
+
+        .quick-picker {
+            position: fixed;
+            z-index: 95;
+            display: none;
+            min-width: 220px;
+            max-width: min(92vw, 320px);
+            padding: 8px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 252, 245, 0.98);
+            box-shadow: 0 18px 30px rgba(66, 42, 20, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-picker.open { display: block; }
+
+        .quick-picker-title {
+            margin: 2px 4px 8px;
+            color: var(--muted);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .quick-picker-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .quick-picker-option {
+            min-height: 30px;
+            border: 1px solid rgba(32, 27, 23, 0.14);
+            border-radius: 999px;
+            padding: 0 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--ink);
+            font-size: 0.76rem;
+            white-space: nowrap;
+        }
+
+        .quick-picker-option.active {
+            border-color: rgba(182, 75, 45, 0.42);
+            background: rgba(182, 75, 45, 0.12);
+            color: #7f351e;
+            font-weight: 700;
+        }
+
+        .guide-wrap { margin-top: 12px; }
+
+        .guide-head {
+            margin-bottom: 14px;
+            max-width: 620px;
+        }
+
+        .guide-head strong {
+            display: block;
+            font-family: "Fraunces", serif;
+            font-size: 1.2rem;
+        }
+
+        .guide-head p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.86rem;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .guide-card {
+            border: 1px solid rgba(32, 27, 23, 0.12);
+            border-radius: 12px;
+            background: rgba(255, 253, 248, 0.94);
+            padding: 13px;
+        }
+
+        .guide-card.wide { grid-column: 1 / -1; }
+
+        .guide-card h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-family: "Fraunces", serif;
+        }
+
+        .guide-card p {
+            margin: 6px 0 0;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .guide-list {
+            margin: 8px 0 0;
+            padding-left: 16px;
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .guide-list strong { color: var(--ink); font-weight: 600; }
+
+        .notes-wrap {
+            display: grid;
+            gap: 10px;
+        }
+
+        .notes-area {
+            width: 100%;
+            min-height: min(58vh, 560px);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            outline: none;
+            background: rgba(255, 253, 248, 0.96);
+            color: var(--ink);
+            padding: 14px;
+            font-size: 0.96rem;
+            line-height: 1.48;
+            resize: vertical;
+            box-shadow: 0 10px 24px rgba(66, 42, 20, 0.07);
+        }
+
+        .notes-area:focus {
+            border-color: rgba(182, 75, 45, 0.6);
+            box-shadow: 0 0 0 2px rgba(182, 75, 45, 0.14);
+        }
+
+        .notes-status {
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .tab-btn {
+            min-height: 48px;
+            border: 0;
+            border-radius: 14px;
+            background: transparent;
+            color: rgba(255, 250, 240, 0.62);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .tab-btn span { display: block; margin-bottom: 2px; font-size: 1rem; }
+        .tab-btn.active { background: var(--cream); color: var(--ink); }
+
+        @media (max-width: 680px) {
+            .app { padding: max(8px, env(safe-area-inset-top)) 8px calc(78px + env(safe-area-inset-bottom)); }
+            .topbar { padding: 7px 0 8px; }
+            .title-wrap strong { font-size: 1.05rem; }
+            .recipe-list { grid-template-columns: 1fr; }
+            .summary-photo { height: clamp(150px, 44vw, 190px); }
+            .summary-main h3 { font-size: 0.94rem; }
+            .summary-comment { font-size: 0.78rem; }
+            .meta-label { font-size: 0.56rem; }
+            .meta-tag { min-height: 25px; font-size: 0.7rem; }
+            .filter-grid, .two-col, .photo-tools, .form-actions { grid-template-columns: 1fr; }
+            .sheet-field-grid { grid-template-columns: 1fr; }
+            .sheet-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sheet-head { padding: 9px; }
+            .guide-head { align-items: start; }
+            .guide-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header class="topbar">
+            <div class="title-wrap">
+                <small>X-E5 Lab</small>
+                <strong>Fuji Recipes</strong>
+            </div>
+            <div class="top-meta">
+                <div class="stat-pill" id="count-total">0 recettes</div>
+                <div class="sync-pill" id="sync-status">local</div>
+            </div>
+        </header>
+
+        <section class="view active" id="view-recipes">
+            <div class="panel">
+                <div class="section-head"><h2>Recettes</h2><span id="results-label" hidden></span></div>
+                <div class="recipe-list" id="recipe-list"></div>
+            </div>
+        </section>
+
+        <section class="view" id="view-editor">
+            <div class="panel">
+                <div class="section-head"><h2 id="editor-title">Ajouter</h2><span id="editor-mode">nouvelle recette</span></div>
+                <form class="form-grid" id="recipe-form">
+                    <input type="hidden" id="recipe-id">
+                    <textarea id="image_urls" hidden></textarea>
+
+                    <div class="sheet-photo-tools">
+                        <span id="editor-photo-count">0 photo</span>
+                        <button class="action-btn" type="button" id="editor-add-photos">Ajouter photo(s)</button>
+                        <input id="image_files" type="file" multiple accept="image/*" hidden>
+                    </div>
+                    <div class="sheet-photos editor-photos" id="editor-photos"></div>
+                    <div class="upload-note" id="upload-status"></div>
+
+                    <div class="field">
+                        <label for="name">Nom du preset</label>
+                        <input id="name" required placeholder="Nom libre">
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="preset">Slot du preset</label>
+                            <select id="preset"></select>
+                        </div>
+                        <div class="field">
+                            <label for="rating">Note</label>
+                            <select id="rating"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="expo_compensation">Expo compensation</label>
+                            <select id="expo_compensation"></select>
+                        </div>
+                        <div class="field">
+                            <label for="favorite">Favori</label>
+                            <select id="favorite">
+                                <option value="false">Non</option>
+                                <option value="true">Oui</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="comment">Commentaire</label>
+                        <textarea id="comment" placeholder="Zone libre"></textarea>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="simulation">Film</label>
+                            <select id="simulation"></select>
+                        </div>
+                        <div class="field">
+                            <label for="grain_effect">Grain</label>
+                            <select id="grain_effect"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="grain_size">Grain Size</label>
+                            <select id="grain_size"></select>
+                            <div class="hint">Actif uniquement si Grain est Weak ou Strong.</div>
+                        </div>
+                        <div class="field">
+                            <label for="color_chrome_effect">Color Chrome FX</label>
+                            <select id="color_chrome_effect"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="color_chrome_fx_blue">Color Chrome Blue</label>
+                            <select id="color_chrome_fx_blue"></select>
+                        </div>
+                        <div class="field">
+                            <label for="smooth_skin_effect">Smooth Skin FX</label>
+                            <select id="smooth_skin_effect"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="white_balance_mode">White Balance</label>
+                            <select id="white_balance_mode"></select>
+                        </div>
+                        <div class="field" id="white-balance-other-wrap" style="display:none;">
+                            <label for="white_balance_other">White Balance - Other</label>
+                            <input id="white_balance_other" placeholder="Ex: 4700K">
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="shift_red">Shift Red</label>
+                            <select id="shift_red"></select>
+                        </div>
+                        <div class="field">
+                            <label for="shift_blue">Shift Blue</label>
+                            <select id="shift_blue"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="dynamic_range">Dynamic Range</label>
+                            <select id="dynamic_range"></select>
+                        </div>
+                        <div class="field">
+                            <label for="d_range_priority">D-Range Prio</label>
+                            <select id="d_range_priority"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="highlights">Highlights</label>
+                            <select id="highlights"></select>
+                        </div>
+                        <div class="field">
+                            <label for="shadows">Shadows</label>
+                            <select id="shadows"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="color">Color</label>
+                            <select id="color"></select>
+                        </div>
+                        <div class="field">
+                            <label for="sharpness">Sharpness</label>
+                            <select id="sharpness"></select>
+                        </div>
+                    </div>
+
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="high_iso_nr">High ISO NR</label>
+                            <select id="high_iso_nr"></select>
+                        </div>
+                        <div class="field">
+                            <label for="clarity">Clarity</label>
+                            <select id="clarity"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="primary-btn" type="submit">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="view" id="view-guide">
+            <div class="panel">
+                <div class="section-head"><h2>Guide des parametres</h2></div>
+                <div class="guide-wrap">
+                    <div class="guide-head">
+                        <strong>Reference rapide Fuji X-E5</strong>
+                        <p>Ce guide fait partie de l'app et reprend l'essentiel des parametres pour ajuster rapidement tes recettes.</p>
+                    </div>
+                    <div class="guide-grid">
+                        <article class="guide-card">
+                            <h3>Film Simulation</h3>
+                            <p>Le reglage le plus important: il donne le style global de l'image.</p>
+                            <ul class="guide-list">
+                                <li><strong>Provia (Standard)</strong> : equilibre, naturel, polyvalent</li>
+                                <li><strong>Velvia (Vivid)</strong> : couleurs tres saturees, contraste eleve</li>
+                                <li><strong>Astia (Soft)</strong> : tons doux, ideal portrait</li>
+                                <li><strong>Classic Chrome</strong> : rendu documentaire, contraste modere</li>
+                                <li><strong>Reala Ace</strong> : rendu realiste et fin</li>
+                                <li><strong>Pro Neg Hi / Pro Neg Std</strong> : portrait studio</li>
+                                <li><strong>Classic Neg</strong> : ombres denses, look vintage</li>
+                                <li><strong>Nostalgic Neg</strong> : ambiance chaude cinema</li>
+                                <li><strong>Eterna / Eterna Bleach Bypass</strong> : look video/cine</li>
+                                <li><strong>Acros / Monochrome / Sepia</strong> : noir et blanc</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Color Chrome / FX Blue</h3>
+                            <p>Renforce la profondeur des couleurs et des bleus.</p>
+                            <ul class="guide-list">
+                                <li><strong>Color Chrome Effect</strong> : agit sur couleurs saturees</li>
+                                <li><strong>Color Chrome FX Blue</strong> : agit surtout sur les bleus</li>
+                                <li><strong>Off / Weak / Strong</strong> : niveau d'intensite</li>
+                                <li><strong>Impact</strong> : evite des rouges/bleus plats</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Smooth Skin Effect</h3>
+                            <p>Lisse la texture de peau pour le portrait.</p>
+                            <ul class="guide-list">
+                                <li><strong>Off</strong> : pas de lissage</li>
+                                <li><strong>Weak</strong> : leger et naturel</li>
+                                <li><strong>Strong</strong> : plus marque</li>
+                                <li><strong>Impact</strong> : a doser pour eviter l'effet plastique</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>White Balance + Shift</h3>
+                            <p>Balance des blancs globale puis correction fine des dominantes.</p>
+                            <ul class="guide-list">
+                                <li><strong>Auto</strong> : automatique standard</li>
+                                <li><strong>Auto ambiance prio</strong> : conserve chaleur</li>
+                                <li><strong>Auto white prio</strong> : blancs plus neutres</li>
+                                <li><strong>Daylight / Shade</strong> : preresets lumiere naturelle</li>
+                                <li><strong>Other...</strong> : valeur libre (ex: 4700K, 6600K)</li>
+                                <li><strong>Shift Blue</strong> : de -6 (plus chaud) a +6 (plus froid)</li>
+                                <li><strong>Shift Red</strong> : de -6 (plus vert) a +6 (plus magenta)</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Dynamic Range</h3>
+                            <p>Etend la plage dynamique pour proteger hautes et basses lumieres.</p>
+                            <ul class="guide-list">
+                                <li><strong>Auto</strong> : ajuste selon la scene</li>
+                                <li><strong>DR100</strong> : standard</li>
+                                <li><strong>DR200</strong> : plage etendue (+1 IL)</li>
+                                <li><strong>DR400</strong> : plage tres etendue (+2 IL)</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>D-Range Priority</h3>
+                            <p>Optimisation automatique complementaire du Dynamic Range.</p>
+                            <ul class="guide-list">
+                                <li><strong>Off</strong> : desactive</li>
+                                <li><strong>Weak</strong> : protection legere</li>
+                                <li><strong>Strong</strong> : protection forte</li>
+                                <li><strong>Auto</strong> : decide automatiquement</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Highlights / Shadows</h3>
+                            <p>Controle le contraste fin de l'image.</p>
+                            <ul class="guide-list">
+                                <li><strong>Highlights</strong> : agit sur zones claires</li>
+                                <li><strong>Shadows</strong> : agit sur zones sombres</li>
+                                <li><strong>Plage</strong> : de -2 a +4</li>
+                                <li><strong>Negatif</strong> : adoucit</li>
+                                <li><strong>Positif</strong> : accentue</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Color (Saturation)</h3>
+                            <p>Intensite globale des couleurs.</p>
+                            <ul class="guide-list">
+                                <li><strong>Plage</strong> : de -4 a +4</li>
+                                <li><strong>Negatif</strong> : couleurs douces</li>
+                                <li><strong>Positif</strong> : couleurs vives</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Sharpness (Nettete)</h3>
+                            <p>Accentuation des contours.</p>
+                            <ul class="guide-list">
+                                <li><strong>Plage</strong> : de -4 a +4</li>
+                                <li><strong>Negatif</strong> : rendu plus doux</li>
+                                <li><strong>Positif</strong> : details accentues</li>
+                                <li><strong>Attention</strong> : trop haut peut creer des halos</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>High ISO NR</h3>
+                            <p>Reduction du bruit numerique en hauts ISO.</p>
+                            <ul class="guide-list">
+                                <li><strong>Plage</strong> : de -4 a +4</li>
+                                <li><strong>Negatif</strong> : plus de bruit mais plus de details</li>
+                                <li><strong>Positif</strong> : image plus propre mais details lisses</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card">
+                            <h3>Clarity</h3>
+                            <p>Micro-contraste sur les tons moyens.</p>
+                            <ul class="guide-list">
+                                <li><strong>Plage</strong> : de -5 a +5</li>
+                                <li><strong>Negatif</strong> : look doux et atmospherique</li>
+                                <li><strong>Positif</strong> : look plus defini</li>
+                            </ul>
+                        </article>
+                        <article class="guide-card wide">
+                            <h3>Conseils d'utilisation</h3>
+                            <p>Quelques points de depart simples pour choisir une recette selon la scene.</p>
+                            <ul class="guide-list">
+                                <li><strong>Street</strong> : Classic Chrome ou Acros, Clarity modere, ombres legerement relevees.</li>
+                                <li><strong>Portrait</strong> : Astia ou Pro Neg Std, Smooth Skin Weak, Clarity negatif.</li>
+                                <li><strong>Paysage</strong> : Velvia ou Provia, Color Chrome Strong, bon equilibre Highlights et Shadows.</li>
+                                <li><strong>Vintage</strong> : Classic Neg ou Nostalgic Neg, Grain Strong Large, Color un peu reduit.</li>
+                                <li><strong>Noir et blanc</strong> : Acros avec un ajustement fin Highlights/Shadows et White Balance Shift.</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view" id="view-notes">
+            <div class="panel">
+                <div class="section-head"><h2>Notes</h2><span id="notes-status">Sauvegarde locale</span></div>
+                <div class="notes-wrap">
+                    <textarea class="notes-area" id="notes-area" placeholder="Tips, tests, idees de recettes, reglages a comparer..."></textarea>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <aside class="recipe-sheet" id="recipe-sheet" aria-hidden="true">
+        <div class="recipe-sheet-card">
+            <div class="sheet-head">
+                <div>
+                    <h3 id="sheet-title">Recette</h3>
+                    <div class="sheet-sub" id="sheet-sub"></div>
+                </div>
+                <button class="sheet-close" type="button" id="sheet-close" aria-label="Fermer">✕</button>
+            </div>
+            <div class="sheet-body">
+                <div class="sheet-photo-tools">
+                    <span id="sheet-photo-count">0 photo</span>
+                    <button class="action-btn" type="button" id="sheet-add-photos">Ajouter photo(s)</button>
+                    <input id="sheet-photo-files" type="file" multiple accept="image/*" hidden>
+                </div>
+                <div class="sheet-photos" id="sheet-photos"></div>
+                <div class="sheet-field">
+                    <label for="sheet-comment">Commentaire</label>
+                    <textarea class="sheet-inline-textarea" id="sheet-comment" data-sheet-field="comment"></textarea>
+                </div>
+                <div id="sheet-settings"></div>
+            </div>
+        </div>
+    </aside>
+
+    <aside class="quick-picker" id="quick-picker" aria-hidden="true">
+        <div class="quick-picker-title" id="quick-picker-title">Choisir</div>
+        <div class="quick-picker-grid" id="quick-picker-grid"></div>
+    </aside>
+
+    <nav class="tabbar" aria-label="Navigation principale">
+        <div class="tabbar-inner">
+            <button class="tab-btn active" type="button" data-view="recipes"><span>◧</span>Recettes</button>
+            <button class="tab-btn" type="button" data-view="editor"><span>＋</span>Ajouter</button>
+            <button class="tab-btn" type="button" data-view="guide"><span>?</span>Guide</button>
+            <button class="tab-btn" type="button" data-view="notes"><span>✎</span>Notes</button>
+        </div>
+    </nav>
+
+    <script>
+        const SUPABASE_URL = "https://aektdwxuviggksjiozme.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_tY7csu_3SswZ1iShZeIweg_HfpUeohn";
+        const SUPABASE_TABLE = "film_recipes";
+        const SUPABASE_BUCKET = "recipe-images";
+        const LOCAL_KEY = "fuji-xe5-recipes-v3";
+        const NOTES_KEY = "fuji-xe5-free-notes-v1";
+
+        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3"];
+        const EXPO_OPTIONS = ["-2 to -3", "-1 to -2", "-1/3 to -1", "0", "1/3 to 1", "1 to 2", "2 to 3"];
+        const FILM_OPTIONS = ["Provia", "Velvia", "Astia", "Classic Chrome", "Reala Ace", "Pro Neg Hi", "Pro Neg Std", "Classic Neg", "Nostalgic Neg", "Eterna", "Eterna Bleach Bypass", "Acros", "Monochrome", "Sepia"];
+        const SIMPLE_LEVEL = ["Off", "Weak", "Strong"];
+        const GRAIN_SIZE_OPTIONS = ["", "Small", "Large"];
+        const WHITE_BALANCE_OPTIONS = ["Auto", "Auto ambiance prio", "Daylight", "Shade", "Auto white prio", "Other..."];
+        const SHIFT_OPTIONS = Array.from({ length: 13 }, (_, i) => String(i - 6));
+        const DYNAMIC_RANGE_OPTIONS = ["Auto", "DR100", "DR200", "DR400"];
+        const D_RANGE_PRIO_OPTIONS = ["Off", "Weak", "Strong", "Auto"];
+        const HALF_STEP_OPTIONS = rangeWithStep(-2, 4, 0.5);
+        const COLOR_OPTIONS = rangeWithStep(-4, 4, 1);
+        const CLARITY_OPTIONS = rangeWithStep(-5, 5, 1);
+
+        const STORAGE_FIELDS = [
+            "name", "preset", "rating", "expo_compensation", "comment", "simulation", "grain_effect", "grain_size",
+            "color_chrome_effect", "color_chrome_fx_blue", "smooth_skin_effect", "white_balance", "shift_red", "shift_blue",
+            "dynamic_range", "d_range_priority", "highlights", "shadows", "color", "sharpness", "high_iso_nr", "clarity",
+            "image_urls", "favorite"
+        ];
+
+        const state = {
+            recipes: [],
+            supabase: null,
+            openMenuId: null,
+            quickPicker: { open: false, recipeId: "", field: "" },
+            sheetRecipeId: "",
+            cardPhotoIndexes: {},
+            notesTimer: null,
+            drag: {
+                timer: null,
+                activeId: "",
+                activeEl: null,
+                placeholderEl: null,
+                started: false,
+                suppressClickUntil: 0,
+                pointerId: null,
+                pointerType: "",
+                startX: 0,
+                currentX: 0,
+                startY: 0,
+                currentY: 0,
+                grabOffsetY: 0,
+                targetId: "",
+                lastHapticAt: 0,
+                autoScrollRaf: null,
+                autoScrollSpeed: 0
+            }
+        };
+
+        const $ = (selector) => document.querySelector(selector);
+        const els = {
+            sync: $("#sync-status"),
+            total: $("#count-total"),
+            list: $("#recipe-list"),
+            results: $("#results-label"),
+            form: $("#recipe-form"),
+            editorTitle: $("#editor-title"),
+            editorMode: $("#editor-mode"),
+            uploadStatus: $("#upload-status"),
+            editorPhotos: $("#editor-photos"),
+            editorPhotoCount: $("#editor-photo-count"),
+            editorAddPhotos: $("#editor-add-photos"),
+            editorPhotoFiles: $("#image_files"),
+            sheet: $("#recipe-sheet"),
+            sheetTitle: $("#sheet-title"),
+            sheetSub: $("#sheet-sub"),
+            sheetPhotos: $("#sheet-photos"),
+            sheetComment: $("#sheet-comment"),
+            sheetSettings: $("#sheet-settings"),
+            sheetPhotoCount: $("#sheet-photo-count"),
+            sheetAddPhotos: $("#sheet-add-photos"),
+            sheetPhotoFiles: $("#sheet-photo-files"),
+            notesArea: $("#notes-area"),
+            notesStatus: $("#notes-status"),
+            quickPicker: $("#quick-picker"),
+            quickPickerTitle: $("#quick-picker-title"),
+            quickPickerGrid: $("#quick-picker-grid")
+        };
+
+        function configured() {
+            return SUPABASE_URL.trim() && SUPABASE_ANON_KEY.trim();
+        }
+
+        async function init() {
+            setupFormOptions();
+            renderEditorPhotos();
+            loadNotes();
+            bindEvents();
+            await loadRecipes();
+            renderAll();
+            prepareNewRecipe(false);
+        }
+
+        async function loadRecipes() {
+            const local = localStorage.getItem(LOCAL_KEY);
+            state.recipes = local ? safeParseJson(local, []) : [];
+
+            if (!configured()) {
+                els.sync.textContent = "local";
+                return;
+            }
+
+            try {
+                state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await state.supabase.from(SUPABASE_TABLE).select("*").order("sort_order", { ascending: true }).order("name", { ascending: true });
+                if (error) throw error;
+                if (Array.isArray(data)) {
+                    state.recipes = data.map(normalizeRecipe).sort((a, b) => a.sort_order - b.sort_order);
+                }
+                els.sync.textContent = "supabase";
+            } catch (error) {
+                console.error(error);
+                els.sync.textContent = "local fallback";
+            }
+
+            normalizeSortOrder();
+            persistLocal();
+        }
+
+        function setupFormOptions() {
+            fillSelect("preset", SLOT_OPTIONS, (value) => value || "Aucun slot");
+            fillSelect("rating", ["", "1", "2", "3", "4", "5"], (value) => value ? `${"★".repeat(Number(value))} (${value})` : "Non notee");
+            fillSelect("expo_compensation", ["", ...EXPO_OPTIONS], (value) => value || "Non defini");
+            fillSelect("simulation", ["", ...FILM_OPTIONS], (value) => value || "Non defini");
+            fillSelect("grain_effect", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
+            fillSelect("grain_size", GRAIN_SIZE_OPTIONS, (value) => value || "Aucun");
+            fillSelect("color_chrome_effect", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
+            fillSelect("color_chrome_fx_blue", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
+            fillSelect("smooth_skin_effect", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
+            fillSelect("white_balance_mode", ["", ...WHITE_BALANCE_OPTIONS], (value) => value || "Non defini");
+            fillSelect("shift_red", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
+            fillSelect("shift_blue", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
+            fillSelect("dynamic_range", ["", ...DYNAMIC_RANGE_OPTIONS], (value) => value || "Non defini");
+            fillSelect("d_range_priority", ["", ...D_RANGE_PRIO_OPTIONS], (value) => value || "Non defini");
+            fillSelect("highlights", ["", ...HALF_STEP_OPTIONS], (value) => value || "Non defini");
+            fillSelect("shadows", ["", ...HALF_STEP_OPTIONS], (value) => value || "Non defini");
+            fillSelect("color", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+            fillSelect("sharpness", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+            fillSelect("high_iso_nr", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+            fillSelect("clarity", ["", ...CLARITY_OPTIONS], (value) => value || "Non defini");
+        }
+
+        function fillSelect(id, values, labelBuilder) {
+            const node = document.getElementById(id);
+            node.innerHTML = values.map((value) => `<option value="${escapeAttr(value)}">${escapeHtml(labelBuilder(value))}</option>`).join("");
+        }
+
+        function bindEvents() {
+            document.querySelectorAll(".tab-btn").forEach((button) => {
+                button.addEventListener("click", () => showView(button.dataset.view));
+            });
+
+            els.list.addEventListener("click", onRecipeAction);
+            els.list.addEventListener("pointerdown", onListPointerDown);
+            document.addEventListener("pointermove", onListPointerMove, { passive: false });
+            document.addEventListener("pointerup", onListPointerUp);
+            document.addEventListener("pointercancel", onListPointerUp);
+            document.addEventListener("click", closeMenusOutside);
+            els.quickPicker.addEventListener("click", onQuickPickerClick);
+
+            els.form.addEventListener("submit", saveRecipe);
+            els.editorAddPhotos.addEventListener("click", () => els.editorPhotoFiles.click());
+            els.editorPhotoFiles.addEventListener("change", uploadSelectedImages);
+            els.editorPhotos.addEventListener("click", onEditorPhotoAction);
+
+            $("#grain_effect").addEventListener("change", syncGrainSizeState);
+            $("#white_balance_mode").addEventListener("change", syncWhiteBalanceOtherState);
+            $("#sheet-close").addEventListener("click", closeRecipeSheet);
+            els.sheetPhotos.addEventListener("click", onSheetPhotoAction);
+            els.sheetAddPhotos.addEventListener("click", () => els.sheetPhotoFiles.click());
+            els.sheetPhotoFiles.addEventListener("change", uploadSheetPhotos);
+            els.sheet.addEventListener("change", onSheetFieldChange);
+            els.sheet.addEventListener("blur", onSheetFieldBlur, true);
+            els.sheet.addEventListener("click", (event) => {
+                if (event.target === els.sheet) closeRecipeSheet();
+            });
+            els.notesArea.addEventListener("input", onNotesInput);
+        }
+
+        function loadNotes() {
+            els.notesArea.value = localStorage.getItem(NOTES_KEY) || "";
+            els.notesStatus.textContent = "Sauvegarde locale";
+        }
+
+        function onNotesInput() {
+            els.notesStatus.textContent = "Sauvegarde...";
+            if (state.notesTimer) clearTimeout(state.notesTimer);
+            state.notesTimer = window.setTimeout(() => {
+                localStorage.setItem(NOTES_KEY, els.notesArea.value);
+                els.notesStatus.textContent = "Sauvegarde locale";
+                state.notesTimer = null;
+            }, 250);
+        }
+
+        function showView(name) {
+            document.querySelectorAll(".view").forEach((view) => {
+                view.classList.toggle("active", view.id === `view-${name}`);
+            });
+            document.querySelectorAll(".tab-btn").forEach((button) => {
+                button.classList.toggle("active", button.dataset.view === name);
+            });
+            if (name === "editor" && !$("#recipe-id").value) {
+                prepareNewRecipe(false);
+            }
+            closeQuickPicker();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function renderAll() {
+            normalizeSortOrder();
+            renderStats();
+            renderRecipes();
+        }
+
+        function renderStats() {
+            const total = state.recipes.length;
+            els.total.textContent = `${total} recette${total > 1 ? "s" : ""}`;
+        }
+
+        function visibleRecipes() {
+            return [...state.recipes].sort((a, b) => {
+                const slotDiff = slotPriority(a.preset) - slotPriority(b.preset);
+                if (slotDiff !== 0) return slotDiff;
+                return a.sort_order - b.sort_order;
+            });
+        }
+
+        function slotPriority(slot) {
+            if (slot === "FS1") return 0;
+            if (slot === "FS2") return 1;
+            if (slot === "FS3") return 2;
+            return 3;
+        }
+
+        function renderRecipes() {
+            const recipes = visibleRecipes();
+            if (els.results) els.results.textContent = "";
+
+            if (!recipes.length) {
+                els.list.innerHTML = '<div class="empty">Aucune recette ne correspond a ces filtres.</div>';
+                return;
+            }
+
+            els.list.innerHTML = recipes.map((recipe) => {
+                const id = escapeAttr(recipe.id);
+                const imageCount = recipe.image_urls.length;
+                const pageCount = Math.max(1, Math.ceil(imageCount / 3));
+                const savedPageIndex = Number(state.cardPhotoIndexes[recipe.id] || 0);
+                const pageIndex = imageCount > 3 ? clamp(savedPageIndex, 0, pageCount - 1) : 0;
+                state.cardPhotoIndexes[recipe.id] = pageIndex;
+                const pageStart = pageIndex * 3;
+                const visibleImages = recipe.image_urls.slice(pageStart, pageStart + 3);
+                const photoClass = visibleImages.length === 1 ? "single" : visibleImages.length === 2 ? "double" : "triple";
+                const photoBadge = imageCount > 3
+                    ? `${pageStart + 1}-${Math.min(pageStart + visibleImages.length, imageCount)}/${imageCount}`
+                    : imageCount > 1 ? `${imageCount} photos` : "";
+                const shortComment = shorten(recipe.comment || "", 120) || "Pas de commentaire";
+                const presetMeta = buildMetaControl("preset", "Slot", recipe.preset, id);
+                const ratingMeta = buildMetaControl("rating", "Note", recipe.rating, id);
+                const expoMeta = buildMetaControl("expo_compensation", "Expo", recipe.expo_compensation, id);
+
+                return `
+                    <article class="recipe-card" data-recipe-id="${id}">
+                        <div class="recipe-summary">
+                            <div class="summary-photo ${photoClass}" data-card-photo="${id}">
+                                ${visibleImages.map((url, index) => `<img src="${escapeAttr(url)}" alt="Photo ${escapeAttr(recipe.name || "recette")} ${pageStart + index + 1}" loading="lazy">`).join("")}
+                                ${photoBadge ? `<span class="photo-count-badge">${escapeHtml(photoBadge)}</span>` : ""}
+                            </div>
+                            <div class="summary-main">
+                                <h3>${escapeHtml(recipe.name || "Sans nom")}</h3>
+                                <p class="summary-meta">
+                                    ${presetMeta}
+                                    ${ratingMeta}
+                                    ${expoMeta}
+                                </p>
+                                <p class="summary-comment">${escapeHtml(shortComment)}</p>
+                            </div>
+                            <div class="card-menu">
+                                <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
+                                <div class="menu-dropdown" data-menu="${id}">
+                                    <button type="button" data-delete="${id}">Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function buildMetaControl(field, label, value, id) {
+            const hasValue = hasQuickValue(field, value);
+            const muted = isQuickMuted(field, value) ? "is-muted" : "";
+            const filled = hasValue ? "has-value" : "";
+            const visibleLabel = hasValue ? "" : `<small class="meta-label">${escapeHtml(label)}</small>`;
+            const slotClass = field === "preset" ? slotTagClass(value) : "";
+            return `<span class="meta-control ${muted} ${filled}">${visibleLabel}<button class="meta-tag ${slotClass}" type="button" data-quick-field="${escapeAttr(field)}" data-quick-id="${id}">${escapeHtml(formatQuickValue(field, value))}</button></span>`;
+        }
+
+        function hasQuickValue(field, value) {
+            const text = String(value || "").trim();
+            if (field === "rating") return normalizeRating(text) > 0;
+            return Boolean(text);
+        }
+
+        function onRecipeAction(event) {
+            if (Date.now() < state.drag.suppressClickUntil) {
+                event.preventDefault();
+                return;
+            }
+
+            const quickButton = event.target.closest("[data-quick-id][data-quick-field]");
+            if (quickButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                const id = quickButton.dataset.quickId;
+                const field = quickButton.dataset.quickField;
+                openQuickPicker(quickButton, id, field);
+                return;
+            }
+
+            const photoButton = event.target.closest("[data-card-photo]");
+            if (photoButton) {
+                const didCycle = cycleCardPhoto(photoButton.dataset.cardPhoto);
+                if (didCycle) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
+
+            const summary = event.target.closest(".recipe-summary");
+            if (summary && !event.target.closest(".card-menu") && !event.target.closest(".summary-meta")) {
+                event.preventDefault();
+                const details = summary.closest(".recipe-card");
+                openRecipeSheet(details?.dataset.recipeId || "");
+                return;
+            }
+
+            const menuToggle = event.target.closest("[data-menu-toggle]");
+            if (menuToggle) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleMenu(menuToggle.dataset.menuToggle);
+                return;
+            }
+
+            const deleteButton = event.target.closest("[data-delete]");
+            if (deleteButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                deleteRecipe(deleteButton.dataset.delete);
+            }
+        }
+
+        function cycleCardPhoto(id) {
+            const recipe = state.recipes.find((item) => String(item.id) === String(id));
+            if (!recipe || recipe.image_urls.length <= 3) return false;
+
+            const pageCount = Math.ceil(recipe.image_urls.length / 3);
+            const current = Number(state.cardPhotoIndexes[recipe.id] || 0);
+            state.cardPhotoIndexes[recipe.id] = (current + 1) % pageCount;
+            renderRecipes();
+            return true;
+        }
+
+        async function setQuickFieldValue(id, field, value) {
+            const recipe = state.recipes.find((item) => String(item.id) === String(id));
+            if (!recipe) return;
+
+            if (!["preset", "rating", "expo_compensation"].includes(field)) return;
+
+            recipe[field] = value;
+            recipe.updated_at = new Date().toISOString();
+
+            if (field === "preset") {
+                await enforceUniquePresetSlot(recipe);
+            }
+            await upsertRecipe(recipe);
+
+            persistLocal();
+            renderRecipes();
+        }
+
+        function openQuickPicker(anchor, recipeId, field) {
+            if (!els.quickPicker || !anchor) return;
+
+            const alreadyOpen = state.quickPicker.open
+                && state.quickPicker.recipeId === String(recipeId)
+                && state.quickPicker.field === field;
+            if (alreadyOpen) {
+                closeQuickPicker();
+                return;
+            }
+
+            const recipe = state.recipes.find((item) => String(item.id) === String(recipeId));
+            if (!recipe) return;
+
+            state.quickPicker.open = true;
+            state.quickPicker.recipeId = String(recipeId);
+            state.quickPicker.field = field;
+
+            const current = String(recipe[field] || "");
+            const options = quickOptions(field);
+            const title = field === "preset" ? "Choisir le slot" : field === "rating" ? "Choisir la note" : "Choisir l'expo";
+            els.quickPickerTitle.textContent = title;
+            els.quickPickerGrid.innerHTML = options.map((option) => {
+                const active = option === current ? "active" : "";
+                return `<button class="quick-picker-option ${active}" type="button" data-quick-option="${escapeAttr(option)}">${escapeHtml(quickOptionLabel(field, option))}</button>`;
+            }).join("");
+
+            const rect = anchor.getBoundingClientRect();
+            els.quickPicker.classList.add("open");
+            els.quickPicker.setAttribute("aria-hidden", "false");
+
+            const pickerRect = els.quickPicker.getBoundingClientRect();
+            const margin = 8;
+            const left = clamp(rect.left, margin, window.innerWidth - pickerRect.width - margin);
+            const preferTop = rect.bottom + 8 + pickerRect.height > window.innerHeight && rect.top - pickerRect.height - 8 >= margin;
+            const top = preferTop
+                ? rect.top - pickerRect.height - 8
+                : Math.min(rect.bottom + 8, window.innerHeight - pickerRect.height - margin);
+
+            els.quickPicker.style.left = `${left}px`;
+            els.quickPicker.style.top = `${top}px`;
+        }
+
+        function closeQuickPicker() {
+            if (!els.quickPicker) return;
+            els.quickPicker.classList.remove("open");
+            els.quickPicker.setAttribute("aria-hidden", "true");
+            els.quickPicker.style.left = "";
+            els.quickPicker.style.top = "";
+            els.quickPickerGrid.innerHTML = "";
+            state.quickPicker.open = false;
+            state.quickPicker.recipeId = "";
+            state.quickPicker.field = "";
+        }
+
+        async function onQuickPickerClick(event) {
+            const option = event.target.closest("[data-quick-option]");
+            if (!option || !state.quickPicker.open) return;
+
+            const { recipeId, field } = state.quickPicker;
+            const value = option.dataset.quickOption || "";
+            closeQuickPicker();
+            await setQuickFieldValue(recipeId, field, value);
+        }
+
+        function quickOptions(field) {
+            if (field === "preset") return SLOT_OPTIONS;
+            if (field === "rating") return ["", "1", "2", "3", "4", "5"];
+            if (field === "expo_compensation") return ["", ...EXPO_OPTIONS];
+            return [""];
+        }
+
+        function quickOptionLabel(field, value) {
+            const text = String(value || "");
+            if (!text) {
+                if (field === "preset") return "Aucun slot";
+                if (field === "rating") return "Non notee";
+                if (field === "expo_compensation") return "Non definie";
+            }
+            if (field === "rating") return `${toStars(text)} (${text})`;
+            return text;
+        }
+
+        function formatQuickValue(field, value) {
+            const text = String(value || "");
+            if (!text) {
+                if (field === "preset") return "Aucun";
+                if (field === "rating") return "-";
+                if (field === "expo_compensation") return "-";
+                return "-";
+            }
+
+            if (field === "rating") {
+                return toStars(text);
+            }
+
+            return text;
+        }
+
+        function slotTagClass(value) {
+            if (value === "FS1") return "slot-fs1";
+            if (value === "FS2") return "slot-fs2";
+            if (value === "FS3") return "slot-fs3";
+            return "";
+        }
+
+        function onListPointerDown(event) {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            if (event.target.closest(".menu-toggle, .menu-dropdown, .summary-meta, button, select, a, input, textarea")) return;
+
+            const summary = event.target.closest(".recipe-summary");
+            const card = event.target.closest(".recipe-card");
+            if (!summary || !card) return;
+
+            clearDragTimer();
+            state.drag.activeId = card.dataset.recipeId || "";
+            state.drag.activeEl = card;
+            state.drag.started = false;
+            state.drag.pointerId = event.pointerId;
+            state.drag.pointerType = event.pointerType || "";
+            state.drag.startX = event.clientX;
+            state.drag.currentX = event.clientX;
+            state.drag.startY = event.clientY;
+            state.drag.currentY = event.clientY;
+            state.drag.grabOffsetY = event.clientY - card.getBoundingClientRect().top;
+            state.drag.targetId = "";
+
+            state.drag.timer = window.setTimeout(() => {
+                startRecipeDrag();
+            }, 420);
+        }
+
+        function onListPointerMove(event) {
+            if (!state.drag.activeId && !state.drag.started) return;
+            if (state.drag.pointerId !== null && event.pointerId !== state.drag.pointerId) return;
+            if (!state.drag.started) {
+                const movedX = event.clientX - state.drag.startX;
+                const movedY = event.clientY - state.drag.startY;
+                if (Math.hypot(movedX, movedY) > 10) {
+                    clearDragTimer();
+                }
+                return;
+            }
+            if (!state.drag.activeId) return;
+            event.preventDefault();
+            state.drag.currentX = event.clientX;
+            state.drag.currentY = event.clientY;
+
+            reorderFromPointerPosition(event.clientX, event.clientY);
+            applyDragVisual();
+            updateAutoScrollIntent();
+        }
+
+        function onListPointerUp(event) {
+            if (state.drag.pointerId !== null && event?.pointerId !== undefined && event.pointerId !== state.drag.pointerId) return;
+
+            const wasDragging = state.drag.started;
+            if (state.drag.started) {
+                state.drag.suppressClickUntil = Date.now() + 400;
+                finalizeDragOrder();
+            }
+
+            clearDragState();
+
+            if (wasDragging) {
+                persistLocal();
+                renderAll();
+                saveOrder().catch((error) => console.error(error));
+            }
+        }
+
+        function startRecipeDrag() {
+            const activeCard = state.drag.activeEl;
+            if (!activeCard || !state.drag.activeId) return;
+
+            const rect = activeCard.getBoundingClientRect();
+            const placeholder = document.createElement("div");
+            placeholder.className = "recipe-drag-placeholder";
+            placeholder.style.height = `${rect.height}px`;
+            activeCard.after(placeholder);
+
+            state.drag.placeholderEl = placeholder;
+            state.drag.started = true;
+            els.list.classList.add("is-dragging");
+            document.body.style.userSelect = "none";
+            document.body.style.webkitUserSelect = "none";
+            if (activeCard.setPointerCapture && state.drag.pointerId !== null) {
+                activeCard.setPointerCapture(state.drag.pointerId);
+            }
+
+            activeCard.classList.add("dragging");
+            activeCard.style.position = "fixed";
+            activeCard.style.left = `${rect.left}px`;
+            activeCard.style.top = `${rect.top}px`;
+            activeCard.style.width = `${rect.width}px`;
+            activeCard.style.zIndex = "120";
+            activeCard.style.pointerEvents = "none";
+            activeCard.style.margin = "0";
+
+            applyDragVisual();
+            pulseHaptic(16);
+        }
+
+        function applyDragVisual() {
+            const activeCard = state.drag.activeEl || document.querySelector(`.recipe-card[data-recipe-id="${cssEscape(state.drag.activeId)}"]`);
+            if (!activeCard) return;
+
+            const top = state.drag.currentY - state.drag.grabOffsetY;
+            activeCard.classList.add("dragging");
+            activeCard.style.top = `${top}px`;
+            activeCard.style.transform = "scale(1.015)";
+        }
+
+        function updateDropTargetVisual(targetId) {
+            if (state.drag.targetId === targetId) return;
+            document.querySelectorAll(".recipe-card.drop-target").forEach((card) => card.classList.remove("drop-target"));
+            state.drag.targetId = targetId;
+
+            if (!targetId || targetId === state.drag.activeId) return;
+            const targetCard = document.querySelector(`.recipe-card[data-recipe-id="${cssEscape(targetId)}"]`);
+            targetCard?.classList.add("drop-target");
+        }
+
+        function reorderFromPointerPosition(clientX, clientY) {
+            const placeholder = state.drag.placeholderEl;
+            if (!placeholder) return;
+
+            const cards = Array.from(els.list.querySelectorAll(".recipe-card:not(.dragging)"));
+            let beforeCard = null;
+            let targetId = "";
+
+            for (const card of cards) {
+                const rect = card.getBoundingClientRect();
+                if (clientY < rect.top + rect.height / 2) {
+                    beforeCard = card;
+                    targetId = card.dataset.recipeId || "";
+                    break;
+                }
+            }
+
+            if (beforeCard) {
+                if (placeholder.nextSibling !== beforeCard) els.list.insertBefore(placeholder, beforeCard);
+            } else if (placeholder !== els.list.lastElementChild) {
+                els.list.appendChild(placeholder);
+                const lastCard = cards[cards.length - 1];
+                targetId = lastCard?.dataset.recipeId || "";
+            }
+
+            updateDropTargetVisual(targetId);
+            pulseHaptic(8, 120);
+        }
+
+        function finalizeDragOrder() {
+            const activeCard = state.drag.activeEl;
+            const placeholder = state.drag.placeholderEl;
+            if (!activeCard || !placeholder) return;
+
+            els.list.insertBefore(activeCard, placeholder);
+            placeholder.remove();
+
+            const orderedIds = Array.from(els.list.querySelectorAll(".recipe-card"))
+                .map((card) => card.dataset.recipeId)
+                .filter(Boolean);
+            const byId = new Map(state.recipes.map((recipe) => [String(recipe.id), recipe]));
+            const ordered = orderedIds.map((id) => byId.get(String(id))).filter(Boolean);
+            const seen = new Set(ordered.map((recipe) => String(recipe.id)));
+            const missing = state.recipes.filter((recipe) => !seen.has(String(recipe.id)));
+
+            state.recipes = [...ordered, ...missing];
+            normalizeSortOrder();
+        }
+
+        function updateAutoScrollIntent() {
+            if (!state.drag.started) {
+                stopAutoScrollLoop();
+                return;
+            }
+
+            const touchMode = state.drag.pointerType === "touch";
+            const edgeThreshold = touchMode ? 128 : 92;
+            const maxSpeed = touchMode ? 9 : 12;
+            const minSpeed = touchMode ? 2 : 1;
+            const y = state.drag.currentY;
+            let speed = 0;
+
+            if (y < edgeThreshold) {
+                speed = -Math.ceil(((edgeThreshold - y) / edgeThreshold) * maxSpeed);
+            } else if (y > window.innerHeight - edgeThreshold) {
+                speed = Math.ceil(((y - (window.innerHeight - edgeThreshold)) / edgeThreshold) * maxSpeed);
+            }
+
+            if (speed > 0) speed = Math.max(minSpeed, speed);
+            if (speed < 0) speed = Math.min(-minSpeed, speed);
+
+            state.drag.autoScrollSpeed = speed;
+            if (!speed) {
+                stopAutoScrollLoop();
+                return;
+            }
+
+            if (state.drag.autoScrollRaf) return;
+            state.drag.autoScrollRaf = window.requestAnimationFrame(runAutoScrollStep);
+        }
+
+        function runAutoScrollStep() {
+            if (!state.drag.started || !state.drag.autoScrollSpeed) {
+                stopAutoScrollLoop();
+                return;
+            }
+
+            window.scrollBy(0, state.drag.autoScrollSpeed);
+            reorderFromPointerPosition(state.drag.currentX, state.drag.currentY);
+            applyDragVisual();
+            state.drag.autoScrollRaf = window.requestAnimationFrame(runAutoScrollStep);
+        }
+
+        function stopAutoScrollLoop() {
+            if (state.drag.autoScrollRaf) {
+                window.cancelAnimationFrame(state.drag.autoScrollRaf);
+                state.drag.autoScrollRaf = null;
+            }
+            state.drag.autoScrollSpeed = 0;
+        }
+
+        function clearDragState() {
+            clearDragTimer();
+            stopAutoScrollLoop();
+            document.body.style.userSelect = "";
+            document.body.style.webkitUserSelect = "";
+            els.list.classList.remove("is-dragging");
+
+            if (state.drag.placeholderEl?.parentNode) {
+                state.drag.placeholderEl.remove();
+            }
+
+            document.querySelectorAll(".recipe-card.dragging").forEach((card) => {
+                card.classList.remove("dragging");
+                card.style.position = "";
+                card.style.left = "";
+                card.style.top = "";
+                card.style.width = "";
+                card.style.zIndex = "";
+                card.style.pointerEvents = "";
+                card.style.margin = "";
+                card.style.transform = "";
+            });
+            document.querySelectorAll(".recipe-card.drop-target").forEach((card) => card.classList.remove("drop-target"));
+
+            state.drag.started = false;
+            state.drag.activeId = "";
+            state.drag.activeEl = null;
+            state.drag.placeholderEl = null;
+            state.drag.pointerId = null;
+            state.drag.pointerType = "";
+            state.drag.startX = 0;
+            state.drag.currentX = 0;
+            state.drag.startY = 0;
+            state.drag.currentY = 0;
+            state.drag.grabOffsetY = 0;
+            state.drag.targetId = "";
+        }
+
+        function pulseHaptic(durationMs, throttleMs = 0) {
+            if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+            const now = Date.now();
+            if (throttleMs > 0 && now - state.drag.lastHapticAt < throttleMs) return;
+            state.drag.lastHapticAt = now;
+            navigator.vibrate(durationMs);
+        }
+
+        function clearDragTimer() {
+            if (state.drag.timer) {
+                clearTimeout(state.drag.timer);
+                state.drag.timer = null;
+            }
+        }
+
+        function reorderRecipe(activeId, targetId) {
+            const fromIndex = state.recipes.findIndex((item) => String(item.id) === String(activeId));
+            const toIndex = state.recipes.findIndex((item) => String(item.id) === String(targetId));
+            if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+
+            const [moved] = state.recipes.splice(fromIndex, 1);
+            state.recipes.splice(toIndex, 0, moved);
+            normalizeSortOrder();
+        }
+
+        function normalizeSortOrder() {
+            state.recipes.forEach((recipe, index) => {
+                recipe.sort_order = index;
+            });
+        }
+
+        async function saveOrder() {
+            if (!state.supabase) return;
+            for (const recipe of state.recipes) {
+                const { error } = await state.supabase
+                    .from(SUPABASE_TABLE)
+                    .update({ sort_order: recipe.sort_order, updated_at: new Date().toISOString() })
+                    .eq("id", recipe.id);
+                if (error) throw error;
+            }
+        }
+
+        function closeMenusOutside(event) {
+            if (!event.target.closest(".card-menu")) {
+                closeAllMenus();
+            }
+            if (!event.target.closest("#quick-picker") && !event.target.closest("[data-quick-id][data-quick-field]")) {
+                closeQuickPicker();
+            }
+        }
+
+        function toggleMenu(id) {
+            const menu = document.querySelector(`[data-menu="${cssEscape(id)}"]`);
+            if (!menu) return;
+            const willOpen = !menu.classList.contains("open");
+            closeAllMenus();
+            if (willOpen) {
+                menu.classList.add("open");
+                state.openMenuId = id;
+            }
+        }
+
+        function openRecipeSheet(id) {
+            const recipe = state.recipes.find((item) => String(item.id) === String(id));
+            if (!recipe) return;
+
+            state.sheetRecipeId = String(id);
+            renderRecipeSheet(recipe);
+            els.sheet.classList.add("open");
+            els.sheet.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function renderRecipeSheet(recipe) {
+            els.sheetTitle.innerHTML = `<input class="sheet-inline-input sheet-title-input" data-sheet-field="name" value="${escapeAttr(recipe.name || "")}" placeholder="Nom de la recette">`;
+            els.sheetSub.innerHTML = `
+                <span>Slot: ${escapeHtml(recipe.preset || "Aucun slot")}</span>
+                <span>Note: ${escapeHtml(toStars(recipe.rating))}</span>
+                <span>Expo: ${escapeHtml(recipe.expo_compensation || "Non defini")}</span>
+            `;
+            els.sheetComment.value = recipe.comment || "";
+            renderSheetPhotos(recipe);
+            els.sheetSettings.innerHTML = buildSheetEditorMarkup(recipe);
+        }
+
+        function closeRecipeSheet() {
+            els.sheet.classList.remove("open");
+            els.sheet.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+            state.sheetRecipeId = "";
+            els.sheetPhotoFiles.value = "";
+        }
+
+        function renderSheetPhotos(recipe) {
+            const urls = recipe.image_urls || [];
+            els.sheetPhotoCount.textContent = `${urls.length} photo${urls.length > 1 ? "s" : ""}`;
+
+            if (!urls.length) {
+                els.sheetPhotos.innerHTML = '<figure class="sheet-photo empty"><figcaption>Aucune photo</figcaption></figure>';
+                return;
+            }
+
+            els.sheetPhotos.innerHTML = urls.map((url, index) => `
+                <figure class="sheet-photo">
+                    <img src="${escapeAttr(url)}" alt="Photo recette ${index + 1}" loading="lazy">
+                    <button class="photo-delete-btn" type="button" data-photo-delete="${escapeAttr(url)}" aria-label="Supprimer cette photo">×</button>
+                </figure>
+            `).join("");
+        }
+
+        function renderEditorPhotos() {
+            const urls = splitImages($("#image_urls").value);
+            els.editorPhotoCount.textContent = `${urls.length} photo${urls.length > 1 ? "s" : ""}`;
+
+            if (!urls.length) {
+                els.editorPhotos.innerHTML = '<figure class="sheet-photo empty"><figcaption>Aucune photo</figcaption></figure>';
+                return;
+            }
+
+            els.editorPhotos.innerHTML = urls.map((url, index) => `
+                <figure class="sheet-photo">
+                    <img src="${escapeAttr(url)}" alt="Photo recette ${index + 1}" loading="lazy">
+                    <button class="photo-delete-btn" type="button" data-editor-photo-delete="${escapeAttr(url)}" aria-label="Supprimer cette photo">×</button>
+                </figure>
+            `).join("");
+        }
+
+        function buildSheetEditorMarkup(recipe) {
+            return `<div class="sheet-field-grid">
+                ${sheetSelect("preset", "Slot", SLOT_OPTIONS, recipe.preset, (value) => value || "Aucun")}
+                ${sheetSelect("rating", "Note", ["", "1", "2", "3", "4", "5"], recipe.rating, (value) => value ? `${"★".repeat(Number(value))} (${value})` : "Non notee")}
+                ${sheetSelect("expo_compensation", "Expo", ["", ...EXPO_OPTIONS], recipe.expo_compensation, (value) => value || "Non definie")}
+                ${sheetSelect("simulation", "Film", ["", ...FILM_OPTIONS], recipe.simulation, (value) => value || "Non defini")}
+                ${sheetSelect("grain_effect", "Grain", ["", ...SIMPLE_LEVEL], recipe.grain_effect, (value) => value || "Non defini")}
+                ${sheetSelect("grain_size", "Grain Size", GRAIN_SIZE_OPTIONS, recipe.grain_size, (value) => value || "Aucun")}
+                ${sheetSelect("color_chrome_effect", "Color Chrome FX", ["", ...SIMPLE_LEVEL], recipe.color_chrome_effect, (value) => value || "Non defini")}
+                ${sheetSelect("color_chrome_fx_blue", "Color Chrome Blue", ["", ...SIMPLE_LEVEL], recipe.color_chrome_fx_blue, (value) => value || "Non defini")}
+                ${sheetSelect("smooth_skin_effect", "Smooth Skin FX", ["", ...SIMPLE_LEVEL], recipe.smooth_skin_effect, (value) => value || "Non defini")}
+                ${sheetInput("white_balance", "White Balance", recipe.white_balance, "Ex: Auto, 4700K")}
+                ${sheetSelect("shift_red", "Shift Red", ["", ...SHIFT_OPTIONS], recipe.shift_red, (value) => value || "Non defini")}
+                ${sheetSelect("shift_blue", "Shift Blue", ["", ...SHIFT_OPTIONS], recipe.shift_blue, (value) => value || "Non defini")}
+                ${sheetSelect("dynamic_range", "Dynamic Range", ["", ...DYNAMIC_RANGE_OPTIONS], recipe.dynamic_range, (value) => value || "Non defini")}
+                ${sheetSelect("d_range_priority", "D-Range Prio", ["", ...D_RANGE_PRIO_OPTIONS], recipe.d_range_priority, (value) => value || "Non defini")}
+                ${sheetSelect("highlights", "Highlights", ["", ...HALF_STEP_OPTIONS], recipe.highlights, (value) => value || "Non defini")}
+                ${sheetSelect("shadows", "Shadows", ["", ...HALF_STEP_OPTIONS], recipe.shadows, (value) => value || "Non defini")}
+                ${sheetSelect("color", "Color", ["", ...COLOR_OPTIONS], recipe.color, (value) => value || "Non defini")}
+                ${sheetSelect("sharpness", "Sharpness", ["", ...COLOR_OPTIONS], recipe.sharpness, (value) => value || "Non defini")}
+                ${sheetSelect("high_iso_nr", "High ISO NR", ["", ...COLOR_OPTIONS], recipe.high_iso_nr, (value) => value || "Non defini")}
+                ${sheetSelect("clarity", "Clarity", ["", ...CLARITY_OPTIONS], recipe.clarity, (value) => value || "Non defini")}
+            </div>`;
+        }
+
+        function sheetSelect(field, label, options, value, labelBuilder) {
+            return `<div class="sheet-field"><label>${escapeHtml(label)}</label><select class="sheet-inline-select" data-sheet-field="${escapeAttr(field)}">${options.map((option) => `<option value="${escapeAttr(option)}" ${String(option) === String(value || "") ? "selected" : ""}>${escapeHtml(labelBuilder(option))}</option>`).join("")}</select></div>`;
+        }
+
+        function sheetInput(field, label, value, placeholder) {
+            return `<div class="sheet-field"><label>${escapeHtml(label)}</label><input class="sheet-inline-input" data-sheet-field="${escapeAttr(field)}" value="${escapeAttr(value || "")}" placeholder="${escapeAttr(placeholder || "")}"></div>`;
+        }
+
+        function currentSheetRecipe() {
+            return state.recipes.find((recipe) => String(recipe.id) === String(state.sheetRecipeId));
+        }
+
+        function onSheetFieldChange(event) {
+            const fieldNode = event.target.closest("[data-sheet-field]");
+            if (!fieldNode || fieldNode.tagName === "TEXTAREA" || fieldNode.tagName === "INPUT") return;
+            updateSheetRecipeField(fieldNode.dataset.sheetField, fieldNode.value).catch(reportSheetSaveError);
+        }
+
+        function onSheetFieldBlur(event) {
+            const fieldNode = event.target.closest("[data-sheet-field]");
+            if (!fieldNode || !["INPUT", "TEXTAREA"].includes(fieldNode.tagName)) return;
+            updateSheetRecipeField(fieldNode.dataset.sheetField, fieldNode.value).catch(reportSheetSaveError);
+        }
+
+        function reportSheetSaveError(error) {
+            console.error(error);
+            alert(`Erreur sauvegarde: ${error.message || "inconnue"}`);
+        }
+
+        async function updateSheetRecipeField(field, value) {
+            const recipe = currentSheetRecipe();
+            if (!recipe || !field) return;
+
+            const nextValue = typeof value === "string" ? value.trim() : value;
+            if (field === "name" && !nextValue) {
+                renderRecipeSheet(recipe);
+                return;
+            }
+
+            recipe[field] = nextValue;
+            if (field === "grain_effect" && (!nextValue || nextValue === "Off")) {
+                recipe.grain_size = "";
+            }
+            recipe.updated_at = new Date().toISOString();
+
+            if (field === "preset") await enforceUniquePresetSlot(recipe);
+            await upsertRecipe(recipe);
+
+            persistLocal();
+            renderRecipes();
+            renderRecipeSheet(recipe);
+        }
+
+        async function onSheetPhotoAction(event) {
+            const deleteButton = event.target.closest("[data-photo-delete]");
+            if (!deleteButton) return;
+
+            event.preventDefault();
+            const url = deleteButton.dataset.photoDelete;
+            if (!url || !confirm("Supprimer cette photo ?")) return;
+
+            const recipe = currentSheetRecipe();
+            if (!recipe) return;
+
+            recipe.image_urls = recipe.image_urls.filter((item) => item !== url);
+            recipe.updated_at = new Date().toISOString();
+
+            await upsertRecipe(recipe);
+            await removeStoredImage(url).catch((error) => console.warn("Image storage non supprimee", error));
+
+            persistLocal();
+            renderRecipes();
+            renderRecipeSheet(recipe);
+        }
+
+        async function onEditorPhotoAction(event) {
+            const deleteButton = event.target.closest("[data-editor-photo-delete]");
+            if (!deleteButton) return;
+
+            event.preventDefault();
+            const url = deleteButton.dataset.editorPhotoDelete;
+            if (!url || !confirm("Supprimer cette photo ?")) return;
+
+            const remaining = splitImages($("#image_urls").value).filter((item) => item !== url);
+            $("#image_urls").value = remaining.join("\n");
+            await removeStoredImage(url).catch((error) => console.warn("Image storage non supprimee", error));
+            renderEditorPhotos();
+        }
+
+        async function uploadSheetPhotos() {
+            const recipe = currentSheetRecipe();
+            const files = Array.from(els.sheetPhotoFiles.files || []);
+            if (!recipe || !files.length) return;
+
+            try {
+                const uploadedUrls = await uploadFilesForRecipe(recipe.id, files);
+                recipe.image_urls = [...new Set([...(recipe.image_urls || []), ...uploadedUrls])];
+                recipe.updated_at = new Date().toISOString();
+                await upsertRecipe(recipe);
+
+                persistLocal();
+                renderRecipes();
+                renderRecipeSheet(recipe);
+            } catch (error) {
+                console.error(error);
+                alert(`Erreur upload: ${error.message || "inconnue"}`);
+            } finally {
+                els.sheetPhotoFiles.value = "";
+            }
+        }
+
+        async function uploadFilesForRecipe(recipeId, files) {
+            if (!state.supabase) throw new Error("Upload disponible uniquement avec Supabase connecte.");
+
+            const uploadedUrls = [];
+            for (const file of files) {
+                const prepared = await compressImageFile(file);
+                const cleanName = slugifyFileName(prepared.name);
+                const path = `${recipeId}/${Date.now()}-${createId()}-${cleanName}`;
+
+                const { error: uploadError } = await state.supabase.storage.from(SUPABASE_BUCKET).upload(path, prepared, {
+                    upsert: false,
+                    contentType: prepared.type || "image/jpeg"
+                });
+
+                if (uploadError) throw uploadError;
+
+                const { data } = state.supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+                if (data?.publicUrl) uploadedUrls.push(data.publicUrl);
+            }
+            return uploadedUrls;
+        }
+
+        async function removeStoredImage(url) {
+            if (!state.supabase) return;
+            const marker = `/storage/v1/object/public/${SUPABASE_BUCKET}/`;
+            const markerIndex = String(url).indexOf(marker);
+            if (markerIndex < 0) return;
+
+            const rawPath = String(url).slice(markerIndex + marker.length).split("?")[0];
+            const path = decodeURIComponent(rawPath);
+            if (!path) return;
+
+            const { error } = await state.supabase.storage.from(SUPABASE_BUCKET).remove([path]);
+            if (error) throw error;
+        }
+
+        function closeAllMenus() {
+            document.querySelectorAll(".menu-dropdown.open").forEach((menu) => menu.classList.remove("open"));
+            state.openMenuId = null;
+        }
+
+        function prepareNewRecipe(switchTab) {
+            els.form.reset();
+            $("#recipe-id").value = "";
+            $("#image_urls").value = "";
+            $("#favorite").value = "false";
+            els.editorPhotoFiles.value = "";
+            els.editorTitle.textContent = "Ajouter";
+            els.editorMode.textContent = "nouvelle recette";
+            setUploadStatus("", "");
+            renderEditorPhotos();
+            syncGrainSizeState();
+            syncWhiteBalanceOtherState();
+            if (switchTab) showView("editor");
+        }
+
+        async function saveRecipe(event) {
+            event.preventDefault();
+            const id = ensureEditingId();
+
+            const whiteBalanceMode = $("#white_balance_mode").value;
+            const whiteBalance = whiteBalanceMode === "Other..."
+                ? $("#white_balance_other").value.trim()
+                : whiteBalanceMode;
+
+            if (whiteBalanceMode === "Other..." && !whiteBalance) {
+                alert("Saisis une valeur pour White Balance (Other).\nExemple: 4700K");
+                return;
+            }
+
+            const previous = state.recipes.find((item) => String(item.id) === String(id));
+            const recipe = {
+                id,
+                created_at: previous?.created_at || new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                sort_order: previous?.sort_order ?? state.recipes.length,
+                name: $("#name").value.trim(),
+                preset: $("#preset").value,
+                rating: $("#rating").value,
+                expo_compensation: $("#expo_compensation").value,
+                comment: $("#comment").value.trim(),
+                simulation: $("#simulation").value,
+                grain_effect: $("#grain_effect").value,
+                grain_size: $("#grain_effect").value === "Off" ? "" : $("#grain_size").value,
+                color_chrome_effect: $("#color_chrome_effect").value,
+                color_chrome_fx_blue: $("#color_chrome_fx_blue").value,
+                smooth_skin_effect: $("#smooth_skin_effect").value,
+                white_balance: whiteBalance,
+                shift_red: $("#shift_red").value,
+                shift_blue: $("#shift_blue").value,
+                dynamic_range: $("#dynamic_range").value,
+                d_range_priority: $("#d_range_priority").value,
+                highlights: $("#highlights").value,
+                shadows: $("#shadows").value,
+                color: $("#color").value,
+                sharpness: $("#sharpness").value,
+                high_iso_nr: $("#high_iso_nr").value,
+                clarity: $("#clarity").value,
+                image_urls: splitImages($("#image_urls").value),
+                favorite: truthy($("#favorite").value)
+            };
+
+            if (!recipe.name) {
+                alert("Le nom du preset est obligatoire.");
+                return;
+            }
+
+            await enforceUniquePresetSlot(recipe);
+
+            await upsertRecipe(recipe);
+
+            const index = state.recipes.findIndex((item) => String(item.id) === String(id));
+            if (index >= 0) state.recipes[index] = recipe;
+            else state.recipes.unshift(recipe);
+
+            normalizeSortOrder();
+            persistLocal();
+            renderAll();
+            prepareNewRecipe(false);
+            showView("recipes");
+        }
+
+        async function upsertRecipe(recipe) {
+            if (!state.supabase) return;
+            const { error } = await state.supabase.from(SUPABASE_TABLE).upsert(recipe);
+            if (error) throw error;
+        }
+
+        async function enforceUniquePresetSlot(recipe) {
+            if (!recipe.preset) return;
+
+            state.recipes.forEach((item) => {
+                if (String(item.id) !== String(recipe.id) && item.preset === recipe.preset) {
+                    item.preset = "";
+                }
+            });
+
+            if (!state.supabase) return;
+
+            const { error } = await state.supabase
+                .from(SUPABASE_TABLE)
+                .update({ preset: "" })
+                .eq("preset", recipe.preset)
+                .neq("id", recipe.id);
+
+            if (error) throw error;
+        }
+
+        async function deleteRecipe(id) {
+            if (!confirm("Supprimer cette recette ?")) return;
+
+            if (state.supabase) {
+                const { error } = await state.supabase.from(SUPABASE_TABLE).delete().eq("id", id);
+                if (error) {
+                    alert(error.message);
+                    return;
+                }
+            }
+
+            state.recipes = state.recipes.filter((recipe) => String(recipe.id) !== String(id));
+            normalizeSortOrder();
+            persistLocal();
+            renderAll();
+            await saveOrder().catch((error) => console.error(error));
+        }
+
+        async function uploadSelectedImages() {
+            setUploadStatus("", "");
+
+            if (!state.supabase) {
+                setUploadStatus("Upload disponible uniquement avec Supabase connecte.", "error");
+                return;
+            }
+
+            const files = Array.from(els.editorPhotoFiles.files || []);
+            if (!files.length) {
+                setUploadStatus("Choisis au moins un fichier image.", "error");
+                return;
+            }
+
+            const recipeId = ensureEditingId();
+
+            try {
+                setUploadStatus("Upload en cours...", "");
+                const uploadedUrls = await uploadFilesForRecipe(recipeId, files);
+
+                const existing = splitImages($("#image_urls").value);
+                const merged = [...new Set([...existing, ...uploadedUrls])];
+                $("#image_urls").value = merged.join("\n");
+                els.editorPhotoFiles.value = "";
+                renderEditorPhotos();
+
+                setUploadStatus(`${uploadedUrls.length} image(s) ajoutee(s).`, "ok");
+            } catch (error) {
+                console.error(error);
+                setUploadStatus(`Erreur upload: ${error.message || "inconnue"}`, "error");
+            } finally {
+                els.editorPhotoFiles.value = "";
+            }
+        }
+
+        async function compressImageFile(file) {
+            if (!file.type.startsWith("image/")) return file;
+
+            try {
+                const image = await fileToImage(file);
+                const maxDimension = 2200;
+                const ratio = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+                const width = Math.max(1, Math.round(image.naturalWidth * ratio));
+                const height = Math.max(1, Math.round(image.naturalHeight * ratio));
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d", { alpha: false });
+                if (!ctx) return file;
+
+                ctx.drawImage(image, 0, 0, width, height);
+
+                const blob = await canvasToBlob(canvas, "image/jpeg", 0.82);
+                if (!blob) return file;
+
+                const finalName = replaceFileExtension(file.name, "jpg");
+                return new File([blob], finalName, { type: "image/jpeg", lastModified: Date.now() });
+            } catch (error) {
+                console.warn("Compression image ignoree", error);
+                return file;
+            }
+        }
+
+        function fileToImage(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const image = new Image();
+                image.onload = () => {
+                    URL.revokeObjectURL(url);
+                    resolve(image);
+                };
+                image.onerror = (error) => {
+                    URL.revokeObjectURL(url);
+                    reject(error);
+                };
+                image.src = url;
+            });
+        }
+
+        function canvasToBlob(canvas, type, quality) {
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => resolve(blob), type, quality);
+            });
+        }
+
+        function replaceFileExtension(name, extension) {
+            const base = String(name || "image").replace(/\.[^.]+$/, "");
+            return `${base}.${extension}`;
+        }
+
+        function setUploadStatus(text, mode) {
+            els.uploadStatus.textContent = text;
+            els.uploadStatus.classList.remove("error", "ok");
+            if (mode) els.uploadStatus.classList.add(mode);
+        }
+
+        function ensureEditingId() {
+            if (!$("#recipe-id").value) {
+                $("#recipe-id").value = createId();
+            }
+            return $("#recipe-id").value;
+        }
+
+        function syncGrainSizeState() {
+            const grain = $("#grain_effect").value;
+            const grainSize = $("#grain_size");
+            const disabled = !grain || grain === "Off";
+            grainSize.disabled = disabled;
+            if (disabled) grainSize.value = "";
+        }
+
+        function syncWhiteBalanceOtherState() {
+            const mode = $("#white_balance_mode").value;
+            const wrap = $("#white-balance-other-wrap");
+            wrap.style.display = mode === "Other..." ? "block" : "none";
+            if (mode !== "Other...") $("#white_balance_other").value = "";
+        }
+
+        function normalizeRecipe(recipe) {
+            const normalizedFilm = normalizeFilm(recipe.simulation || "");
+            const normalizedWb = normalizeWhiteBalance(recipe.white_balance || "");
+            return {
+                id: String(recipe.id || createId()),
+                created_at: recipe.created_at || new Date().toISOString(),
+                updated_at: recipe.updated_at || new Date().toISOString(),
+                sort_order: Number.isFinite(Number(recipe.sort_order)) ? Number(recipe.sort_order) : 0,
+                name: String(recipe.name || "").trim(),
+                preset: SLOT_OPTIONS.includes(recipe.preset) ? recipe.preset : "",
+                rating: String(normalizeRating(recipe.rating) || ""),
+                expo_compensation: EXPO_OPTIONS.includes(recipe.expo_compensation) ? recipe.expo_compensation : "",
+                comment: String(recipe.comment || "").trim(),
+                simulation: FILM_OPTIONS.includes(normalizedFilm) ? normalizedFilm : "",
+                grain_effect: SIMPLE_LEVEL.includes(recipe.grain_effect) ? recipe.grain_effect : "",
+                grain_size: GRAIN_SIZE_OPTIONS.includes(recipe.grain_size) ? recipe.grain_size : "",
+                color_chrome_effect: SIMPLE_LEVEL.includes(recipe.color_chrome_effect) ? recipe.color_chrome_effect : "",
+                color_chrome_fx_blue: SIMPLE_LEVEL.includes(recipe.color_chrome_fx_blue) ? recipe.color_chrome_fx_blue : "",
+                smooth_skin_effect: SIMPLE_LEVEL.includes(recipe.smooth_skin_effect) ? recipe.smooth_skin_effect : "",
+                white_balance: normalizedWb,
+                shift_red: SHIFT_OPTIONS.includes(String(recipe.shift_red || "")) ? String(recipe.shift_red) : "",
+                shift_blue: SHIFT_OPTIONS.includes(String(recipe.shift_blue || "")) ? String(recipe.shift_blue) : "",
+                dynamic_range: DYNAMIC_RANGE_OPTIONS.includes(recipe.dynamic_range) ? recipe.dynamic_range : "",
+                d_range_priority: D_RANGE_PRIO_OPTIONS.includes(recipe.d_range_priority) ? recipe.d_range_priority : "",
+                highlights: HALF_STEP_OPTIONS.includes(String(recipe.highlights || "")) ? String(recipe.highlights) : "",
+                shadows: HALF_STEP_OPTIONS.includes(String(recipe.shadows || "")) ? String(recipe.shadows) : "",
+                color: COLOR_OPTIONS.includes(String(recipe.color || "")) ? String(recipe.color) : "",
+                sharpness: COLOR_OPTIONS.includes(String(recipe.sharpness || "")) ? String(recipe.sharpness) : "",
+                high_iso_nr: COLOR_OPTIONS.includes(String(recipe.high_iso_nr || "")) ? String(recipe.high_iso_nr) : "",
+                clarity: CLARITY_OPTIONS.includes(String(recipe.clarity || "")) ? String(recipe.clarity) : "",
+                image_urls: splitImages(recipe.image_urls),
+                favorite: truthy(recipe.favorite)
+            };
+        }
+
+        function normalizeFilm(value) {
+            const text = String(value || "").trim();
+            if (!text) return "";
+            const map = {
+                "Provia (Standard)": "Provia",
+                "Velvia (Vivid)": "Velvia",
+                "Astia (Soft)": "Astia"
+            };
+            return map[text] || text;
+        }
+
+        function normalizeWhiteBalance(value) {
+            const text = String(value || "").trim();
+            if (!text) return "";
+            if (text.toLowerCase() === "auto ambiance pro") return "Auto ambiance prio";
+            if (text.toLowerCase() === "auto white pro") return "Auto white prio";
+            return text;
+        }
+
+        function splitImages(value) {
+            if (Array.isArray(value)) return value.map((url) => String(url).trim()).filter(Boolean);
+            return String(value || "")
+                .split(/[\n,]+/)
+                .map((url) => url.trim())
+                .filter(Boolean);
+        }
+
+        function normalizeRating(value) {
+            const raw = String(value || "").trim();
+            if (!raw) return 0;
+            const unicodeStars = (raw.match(/★/g) || []).length + (raw.match(/⭐/g) || []).length;
+            if (unicodeStars) return clamp(unicodeStars, 0, 5);
+            const asciiStars = (raw.match(/\*/g) || []).length;
+            if (asciiStars) return clamp(asciiStars, 0, 5);
+            const parsed = Number.parseInt(raw, 10);
+            return Number.isFinite(parsed) ? clamp(parsed, 0, 5) : 0;
+        }
+
+        function toStars(value) {
+            const n = normalizeRating(value);
+            return n ? "★".repeat(n) : "-";
+        }
+
+        function isQuickMuted(field, value) {
+            if (field === "expo_compensation") {
+                return !value || String(value).trim() === "0";
+            }
+            return !String(value || "").trim();
+        }
+
+        function persistLocal() {
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(state.recipes));
+        }
+
+        function truthy(value) {
+            return value === true || value === "true" || value === "1";
+        }
+
+        function createId() {
+            return window.crypto?.randomUUID
+                ? window.crypto.randomUUID()
+                : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        }
+
+        function rangeWithStep(min, max, step) {
+            const values = [];
+            for (let n = min; n <= max + 0.0001; n += step) {
+                values.push(formatNumber(n));
+            }
+            return values;
+        }
+
+        function formatNumber(value) {
+            const rounded = Math.round(value * 10) / 10;
+            return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+        }
+
+        function slugifyFileName(name) {
+            return String(name || "image.jpg")
+                .toLowerCase()
+                .replace(/[^a-z0-9._-]+/g, "-")
+                .replace(/-+/g, "-")
+                .replace(/^-|-$/g, "");
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function shorten(text, maxLength) {
+            const clean = String(text || "").trim();
+            if (clean.length <= maxLength) return clean;
+            return `${clean.slice(0, maxLength - 1)}…`;
+        }
+
+        function safeParseJson(text, fallback) {
+            try { return JSON.parse(text); }
+            catch { return fallback; }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function escapeAttr(value) {
+            return escapeHtml(value).replaceAll("`", "&#96;");
+        }
+
+        function cssEscape(value) {
+            if (window.CSS?.escape) return window.CSS.escape(value);
+            return String(value).replace(/([\\"'\[\]#.:])/g, "\\$1");
+        }
+
+        function isMobileViewport() {
+            return window.matchMedia("(max-width: 680px)").matches;
+        }
+
+        init();
+    </script>
+</body>
+</html>
