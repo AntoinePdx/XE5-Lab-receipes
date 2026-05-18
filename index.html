@@ -1264,6 +1264,8 @@
                 lastHapticAt: 0,
                 autoScrollRaf: null,
                 autoScrollSpeed: 0
+                ,
+                touchActionDisabled: false
             }
         };
 
@@ -1722,6 +1724,10 @@
             state.drag.started = false;
             state.drag.pointerId = event.pointerId;
             state.drag.pointerType = event.pointerType || "";
+            if (event.pointerType === "touch") {
+                document.body.style.touchAction = "none";
+                state.drag.touchActionDisabled = true;
+            }
             state.drag.startX = event.clientX;
             state.drag.currentX = event.clientX;
             state.drag.startY = event.clientY;
@@ -1947,6 +1953,8 @@
             stopAutoScrollLoop();
             document.body.style.userSelect = "";
             document.body.style.webkitUserSelect = "";
+            document.body.style.touchAction = "";
+            state.drag.touchActionDisabled = false;
             els.list.classList.remove("is-dragging");
 
             if (state.drag.placeholderEl?.parentNode) {
@@ -1992,6 +2000,10 @@
             if (state.drag.timer) {
                 clearTimeout(state.drag.timer);
                 state.drag.timer = null;
+            }
+            if (state.drag.touchActionDisabled) {
+                document.body.style.touchAction = "";
+                state.drag.touchActionDisabled = false;
             }
         }
 
