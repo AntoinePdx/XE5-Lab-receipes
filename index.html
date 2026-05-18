@@ -59,7 +59,7 @@
         .topbar {
             position: fixed;
             left: 50%;
-            top: env(safe-area-inset-top);
+            top: 0;
             transform: translateX(-50%) translateY(0);
             z-index: 120;
             width: min(100%, 860px);
@@ -67,12 +67,12 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 0;
-            backdrop-filter: blur(16px);
+            padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+            backdrop-filter: blur(18px);
             transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
-            background: rgba(255, 253, 248, 0.85);
-            border-bottom: 1px solid rgba(32,27,23,0.06);
-            box-shadow: 0 8px 18px rgba(32,27,23,0.06);
+            background: rgba(255, 255, 255, 0.06); /* transparent + blur */
+            border-bottom: none;
+            box-shadow: 0 6px 18px rgba(32,27,23,0.06);
         }
 
         .topbar.topbar--hidden {
@@ -123,7 +123,7 @@
         .topbar {
             position: fixed;
             left: 50%;
-            top: env(safe-area-inset-top);
+            top: 0;
             transform: translateX(-50%) translateY(0);
             z-index: 120;
             width: min(100%, 860px);
@@ -131,12 +131,12 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 12px;
-            backdrop-filter: blur(16px);
+            padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+            backdrop-filter: blur(18px);
             transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
-            background: rgba(255, 253, 248, 0.85);
-            border-bottom: 1px solid rgba(32,27,23,0.06);
-            box-shadow: 0 8px 18px rgba(32,27,23,0.06);
+            background: rgba(255, 255, 255, 0.06); /* transparent + blur */
+            border-bottom: none;
+            box-shadow: 0 6px 18px rgba(32,27,23,0.06);
         }
         .section-head h2 { margin: 0; font-family: "Fraunces", serif; font-size: 1.16rem; }
         .section-head span { color: var(--muted); font-size: 0.78rem; }
@@ -1286,9 +1286,10 @@
             const topbar = document.querySelector('.topbar');
             const app = document.querySelector('.app');
             if (!topbar || !app) return;
-            const h = Math.ceil(topbar.getBoundingClientRect().height || 0);
-            // ensure some comfortable spacing
-            app.style.paddingTop = `${h + 8}px`;
+            const rect = topbar.getBoundingClientRect();
+            // compute padding so content starts below the header + iOS safe inset
+            const pad = Math.ceil(Math.max(rect.bottom, rect.height) + 8);
+            app.style.paddingTop = `${pad}px`;
         }
 
         function attachTopbarScrollHandlers() {
