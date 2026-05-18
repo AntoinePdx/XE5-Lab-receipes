@@ -1737,14 +1737,30 @@
         function onListPointerMove(event) {
             if (!state.drag.activeId && !state.drag.started) return;
             if (state.drag.pointerId !== null && event.pointerId !== state.drag.pointerId) return;
+
             if (!state.drag.started) {
                 const movedX = event.clientX - state.drag.startX;
                 const movedY = event.clientY - state.drag.startY;
-                if (Math.hypot(movedX, movedY) > 10) {
+                const distance = Math.hypot(movedX, movedY);
+                const verticalDominant = Math.abs(movedY) > Math.abs(movedX);
+
+                if (distance > 10) {
+                    // If user movement is mostly vertical, assume reorder intent
+                    // and start the drag immediately to prevent the page from
+                    // scrolling and losing the selection. Otherwise just cancel
+                    // the long-press timer (allow normal scroll).
                     clearDragTimer();
+                    if (verticalDominant) {
+                        startRecipeDrag();
+                        // allow fall-through to the active drag handling below
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
                 }
-                return;
             }
+
             if (!state.drag.activeId) return;
             event.preventDefault();
             state.drag.currentX = event.clientX;
