@@ -643,9 +643,9 @@
             width: min(100%, 860px);
             transform: translateX(-50%);
             padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-            background: transparent;
-            backdrop-filter: blur(22px);
-            box-shadow: 0 24px 48px rgba(32,27,23,0.28);
+            background: transparent; /* outer background invisible */
+            backdrop-filter: none;
+            box-shadow: none;
         }
 
         .tabbar-inner {
@@ -653,10 +653,10 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             padding: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 20px;
-            background: transparent; /* make inner oval background invisible */
-            border: none;
-            box-shadow: 0 18px 38px rgba(32, 27, 23, 0.22);
+            background: rgba(34, 29, 25, 0.92); /* dark inner oval restored */
+            box-shadow: 0 20px 40px rgba(32, 27, 23, 0.32);
         }
 
         .quick-picker {
