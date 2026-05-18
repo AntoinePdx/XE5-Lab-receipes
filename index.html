@@ -211,13 +211,11 @@
             gap: 10px;
             align-items: start;
             padding: 9px;
-            cursor: grab;
+            cursor: pointer;
             list-style: none;
             user-select: none;
             -webkit-user-select: none;
         }
-
-        .recipe-list.is-dragging .recipe-summary { cursor: grabbing; }
 
         .summary-photo {
             position: relative;
@@ -293,29 +291,7 @@
             font-size: 0.6rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            line-height: 1;
-        }
-
-        .meta-tag {
-            min-height: 28px;
-            border: 1px solid rgba(32, 27, 23, 0.14);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.96);
-            color: var(--ink);
-            padding: 0 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
-        }
-
-        .meta-tag:active { transform: scale(0.98); }
-
-        .meta-tag.slot-fs1 {
-            border-color: rgba(0, 118, 176, 0.38);
-            background: rgba(0, 118, 176, 0.14);
-            color: #0a4c6d;
+            notesTimer: null
         }
 
         .meta-tag.slot-fs2 {
@@ -391,28 +367,7 @@
 
         .menu-dropdown button:last-child { border-bottom: 0; color: var(--danger); }
 
-        .recipe-list.is-dragging .recipe-card {
-            transition: box-shadow 120ms ease, background-color 120ms ease;
-        }
-
-        .recipe-card.dragging {
-            opacity: 0.96;
-            border-color: rgba(182, 75, 45, 0.38);
-            box-shadow: 0 22px 48px rgba(66, 42, 20, 0.26);
-            cursor: grabbing;
-        }
-
-        .recipe-card.drop-target {
-            background: rgba(182, 75, 45, 0.08);
-            box-shadow: 0 0 0 2px rgba(182, 75, 45, 0.26) inset;
-        }
-
-        .recipe-drag-placeholder {
-            border: 2px dashed rgba(182, 75, 45, 0.42);
-            border-radius: 16px;
-            background: rgba(182, 75, 45, 0.08);
-            transition: height 120ms ease, margin 120ms ease;
-        }
+        /* Drag styles removed — reorder via menu actions */
 
         .action-btn, .primary-btn, .danger-btn {
             min-height: 44px;
@@ -1245,28 +1200,7 @@
             quickPicker: { open: false, recipeId: "", field: "" },
             sheetRecipeId: "",
             cardPhotoIndexes: {},
-            notesTimer: null,
-            drag: {
-                timer: null,
-                activeId: "",
-                activeEl: null,
-                placeholderEl: null,
-                started: false,
-                suppressClickUntil: 0,
-                pointerId: null,
-                pointerType: "",
-                startX: 0,
-                currentX: 0,
-                startY: 0,
-                currentY: 0,
-                grabOffsetY: 0,
-                targetId: "",
-                lastHapticAt: 0,
-                autoScrollRaf: null,
-                autoScrollSpeed: 0
-                ,
-                touchActionDisabled: false
-            }
+            notesTimer: null
         };
 
         const $ = (selector) => document.querySelector(selector);
@@ -1373,10 +1307,6 @@
             });
 
             els.list.addEventListener("click", onRecipeAction);
-            els.list.addEventListener("pointerdown", onListPointerDown);
-            document.addEventListener("pointermove", onListPointerMove, { passive: false });
-            document.addEventListener("pointerup", onListPointerUp);
-            document.addEventListener("pointercancel", onListPointerUp);
             document.addEventListener("click", closeMenusOutside);
             els.quickPicker.addEventListener("click", onQuickPickerClick);
 
@@ -1500,6 +1430,8 @@
                             <div class="card-menu">
                                 <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
                                 <div class="menu-dropdown" data-menu="${id}">
+                                    <button type="button" data-move-up="${id}">Monter</button>
+                                    <button type="button" data-move-down="${id}">Descendre</button>
                                     <button type="button" data-delete="${id}">Supprimer</button>
                                 </div>
                             </div>
@@ -1525,8 +1457,20 @@
         }
 
         function onRecipeAction(event) {
-            if (Date.now() < state.drag.suppressClickUntil) {
+            const moveUpButton = event.target.closest("[data-move-up]");
+            if (moveUpButton) {
                 event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                moveRecipeUp(moveUpButton.dataset.moveUp);
+                return;
+            }
+            const moveDownButton = event.target.closest("[data-move-down]");
+            if (moveDownButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                moveRecipeDown(moveDownButton.dataset.moveDown);
                 return;
             }
 
@@ -1709,312 +1653,7 @@
             if (value === "FS3") return "slot-fs3";
             return "";
         }
-
-        function onListPointerDown(event) {
-            if (event.pointerType === "mouse" && event.button !== 0) return;
-            if (event.target.closest(".menu-toggle, .menu-dropdown, .summary-meta, button, select, a, input, textarea")) return;
-
-            const summary = event.target.closest(".recipe-summary");
-            const card = event.target.closest(".recipe-card");
-            if (!summary || !card) return;
-
-            clearDragTimer();
-            state.drag.activeId = card.dataset.recipeId || "";
-            state.drag.activeEl = card;
-            state.drag.started = false;
-            state.drag.pointerId = event.pointerId;
-            state.drag.pointerType = event.pointerType || "";
-            if (event.pointerType === "touch") {
-                if (els && els.list) els.list.style.touchAction = "none";
-                state.drag.touchActionDisabled = true;
-
-                if (card && card.setPointerCapture && state.drag.pointerId !== null) {
-                    try { card.setPointerCapture(state.drag.pointerId); } catch (e) { }
-                }
-            }
-            state.drag.startX = event.clientX;
-            state.drag.currentX = event.clientX;
-            state.drag.startY = event.clientY;
-            state.drag.currentY = event.clientY;
-            state.drag.grabOffsetY = event.clientY - card.getBoundingClientRect().top;
-            state.drag.targetId = "";
-
-            state.drag.timer = window.setTimeout(() => {
-                startRecipeDrag();
-            }, 420);
-        }
-
-        function onListPointerMove(event) {
-            if (!state.drag.activeId && !state.drag.started) return;
-            if (state.drag.pointerId !== null && event.pointerId !== state.drag.pointerId) return;
-
-            if (!state.drag.started) {
-                const movedX = event.clientX - state.drag.startX;
-                const movedY = event.clientY - state.drag.startY;
-                const distance = Math.hypot(movedX, movedY);
-                const verticalDominant = Math.abs(movedY) > Math.abs(movedX);
-
-                if (distance > 10) {
-                    // If user movement is mostly vertical, assume reorder intent
-                    // and start the drag immediately to prevent the page from
-                    // scrolling and losing the selection. Otherwise just cancel
-                    // the long-press timer (allow normal scroll).
-                    clearDragTimer();
-                    if (verticalDominant) {
-                        startRecipeDrag();
-                        // allow fall-through to the active drag handling below
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            }
-
-            if (!state.drag.activeId) return;
-            event.preventDefault();
-            state.drag.currentX = event.clientX;
-            state.drag.currentY = event.clientY;
-
-            reorderFromPointerPosition(event.clientX, event.clientY);
-            applyDragVisual();
-            updateAutoScrollIntent();
-        }
-
-        function onListPointerUp(event) {
-            if (state.drag.pointerId !== null && event?.pointerId !== undefined && event.pointerId !== state.drag.pointerId) return;
-
-            const wasDragging = state.drag.started;
-            if (state.drag.started) {
-                state.drag.suppressClickUntil = Date.now() + 400;
-                finalizeDragOrder();
-            }
-
-            clearDragState();
-
-            if (wasDragging) {
-                persistLocal();
-                renderAll();
-                saveOrder().catch((error) => console.error(error));
-            }
-        }
-
-        function startRecipeDrag() {
-            const activeCard = state.drag.activeEl;
-            if (!activeCard || !state.drag.activeId) return;
-
-            const rect = activeCard.getBoundingClientRect();
-            const placeholder = document.createElement("div");
-            placeholder.className = "recipe-drag-placeholder";
-            placeholder.style.height = `${rect.height}px`;
-            activeCard.after(placeholder);
-
-            state.drag.placeholderEl = placeholder;
-            state.drag.started = true;
-            els.list.classList.add("is-dragging");
-            document.body.style.userSelect = "none";
-            document.body.style.webkitUserSelect = "none";
-            if (activeCard.setPointerCapture && state.drag.pointerId !== null) {
-                activeCard.setPointerCapture(state.drag.pointerId);
-            }
-
-            activeCard.classList.add("dragging");
-            activeCard.style.position = "fixed";
-            activeCard.style.left = `${rect.left}px`;
-            activeCard.style.top = `${rect.top}px`;
-            activeCard.style.width = `${rect.width}px`;
-            activeCard.style.zIndex = "120";
-            activeCard.style.pointerEvents = "none";
-            activeCard.style.margin = "0";
-
-            applyDragVisual();
-            pulseHaptic(16);
-        }
-
-        function applyDragVisual() {
-            const activeCard = state.drag.activeEl || document.querySelector(`.recipe-card[data-recipe-id="${cssEscape(state.drag.activeId)}"]`);
-            if (!activeCard) return;
-
-            const top = state.drag.currentY - state.drag.grabOffsetY;
-            activeCard.classList.add("dragging");
-            activeCard.style.top = `${top}px`;
-            activeCard.style.transform = "scale(1.015)";
-        }
-
-        function updateDropTargetVisual(targetId) {
-            if (state.drag.targetId === targetId) return;
-            document.querySelectorAll(".recipe-card.drop-target").forEach((card) => card.classList.remove("drop-target"));
-            state.drag.targetId = targetId;
-
-            if (!targetId || targetId === state.drag.activeId) return;
-            const targetCard = document.querySelector(`.recipe-card[data-recipe-id="${cssEscape(targetId)}"]`);
-            targetCard?.classList.add("drop-target");
-        }
-
-        function reorderFromPointerPosition(clientX, clientY) {
-            const placeholder = state.drag.placeholderEl;
-            if (!placeholder) return;
-
-            const cards = Array.from(els.list.querySelectorAll(".recipe-card:not(.dragging)"));
-            let beforeCard = null;
-            let targetId = "";
-
-            for (const card of cards) {
-                const rect = card.getBoundingClientRect();
-                if (clientY < rect.top + rect.height / 2) {
-                    beforeCard = card;
-                    targetId = card.dataset.recipeId || "";
-                    break;
-                }
-            }
-
-            if (beforeCard) {
-                if (placeholder.nextSibling !== beforeCard) els.list.insertBefore(placeholder, beforeCard);
-            } else if (placeholder !== els.list.lastElementChild) {
-                els.list.appendChild(placeholder);
-                const lastCard = cards[cards.length - 1];
-                targetId = lastCard?.dataset.recipeId || "";
-            }
-
-            updateDropTargetVisual(targetId);
-            pulseHaptic(8, 120);
-        }
-
-        function finalizeDragOrder() {
-            const activeCard = state.drag.activeEl;
-            const placeholder = state.drag.placeholderEl;
-            if (!activeCard || !placeholder) return;
-
-            els.list.insertBefore(activeCard, placeholder);
-            placeholder.remove();
-
-            const orderedIds = Array.from(els.list.querySelectorAll(".recipe-card"))
-                .map((card) => card.dataset.recipeId)
-                .filter(Boolean);
-            const byId = new Map(state.recipes.map((recipe) => [String(recipe.id), recipe]));
-            const ordered = orderedIds.map((id) => byId.get(String(id))).filter(Boolean);
-            const seen = new Set(ordered.map((recipe) => String(recipe.id)));
-            const missing = state.recipes.filter((recipe) => !seen.has(String(recipe.id)));
-
-            state.recipes = [...ordered, ...missing];
-            normalizeSortOrder();
-        }
-
-        function updateAutoScrollIntent() {
-            if (!state.drag.started) {
-                stopAutoScrollLoop();
-                return;
-            }
-
-            const touchMode = state.drag.pointerType === "touch";
-            const edgeThreshold = touchMode ? 128 : 92;
-            const maxSpeed = touchMode ? 9 : 12;
-            const minSpeed = touchMode ? 2 : 1;
-            const y = state.drag.currentY;
-            let speed = 0;
-
-            if (y < edgeThreshold) {
-                speed = -Math.ceil(((edgeThreshold - y) / edgeThreshold) * maxSpeed);
-            } else if (y > window.innerHeight - edgeThreshold) {
-                speed = Math.ceil(((y - (window.innerHeight - edgeThreshold)) / edgeThreshold) * maxSpeed);
-            }
-
-            if (speed > 0) speed = Math.max(minSpeed, speed);
-            if (speed < 0) speed = Math.min(-minSpeed, speed);
-
-            state.drag.autoScrollSpeed = speed;
-            if (!speed) {
-                stopAutoScrollLoop();
-                return;
-            }
-
-            if (state.drag.autoScrollRaf) return;
-            state.drag.autoScrollRaf = window.requestAnimationFrame(runAutoScrollStep);
-        }
-
-        function runAutoScrollStep() {
-            if (!state.drag.started || !state.drag.autoScrollSpeed) {
-                stopAutoScrollLoop();
-                return;
-            }
-
-            window.scrollBy(0, state.drag.autoScrollSpeed);
-            reorderFromPointerPosition(state.drag.currentX, state.drag.currentY);
-            applyDragVisual();
-            state.drag.autoScrollRaf = window.requestAnimationFrame(runAutoScrollStep);
-        }
-
-        function stopAutoScrollLoop() {
-            if (state.drag.autoScrollRaf) {
-                window.cancelAnimationFrame(state.drag.autoScrollRaf);
-                state.drag.autoScrollRaf = null;
-            }
-            state.drag.autoScrollSpeed = 0;
-        }
-
-        function clearDragState() {
-            clearDragTimer();
-            stopAutoScrollLoop();
-            document.body.style.userSelect = "";
-            document.body.style.webkitUserSelect = "";
-            if (state.drag.activeEl && state.drag.pointerId !== null && state.drag.activeEl.releasePointerCapture) {
-                try { state.drag.activeEl.releasePointerCapture(state.drag.pointerId); } catch (e) { }
-            }
-            if (state.drag.touchActionDisabled && els && els.list) {
-                els.list.style.touchAction = "";
-                state.drag.touchActionDisabled = false;
-            }
-            els.list.classList.remove("is-dragging");
-
-            if (state.drag.placeholderEl?.parentNode) {
-                state.drag.placeholderEl.remove();
-            }
-
-            document.querySelectorAll(".recipe-card.dragging").forEach((card) => {
-                card.classList.remove("dragging");
-                card.style.position = "";
-                card.style.left = "";
-                card.style.top = "";
-                card.style.width = "";
-                card.style.zIndex = "";
-                card.style.pointerEvents = "";
-                card.style.margin = "";
-                card.style.transform = "";
-            });
-            document.querySelectorAll(".recipe-card.drop-target").forEach((card) => card.classList.remove("drop-target"));
-
-            state.drag.started = false;
-            state.drag.activeId = "";
-            state.drag.activeEl = null;
-            state.drag.placeholderEl = null;
-            state.drag.pointerId = null;
-            state.drag.pointerType = "";
-            state.drag.startX = 0;
-            state.drag.currentX = 0;
-            state.drag.startY = 0;
-            state.drag.currentY = 0;
-            state.drag.grabOffsetY = 0;
-            state.drag.targetId = "";
-        }
-
-        function pulseHaptic(durationMs, throttleMs = 0) {
-            if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
-            const now = Date.now();
-            if (throttleMs > 0 && now - state.drag.lastHapticAt < throttleMs) return;
-            state.drag.lastHapticAt = now;
-            navigator.vibrate(durationMs);
-        }
-
-        function clearDragTimer() {
-            if (state.drag.timer) {
-                clearTimeout(state.drag.timer);
-                state.drag.timer = null;
-            }
-            if (state.drag.touchActionDisabled && els && els.list) {
-                els.list.style.touchAction = "";
-                state.drag.touchActionDisabled = false;
-            }
-        }
+        // Drag-and-drop reordering removed — use menu actions (Monter/Descendre)
 
         function reorderRecipe(activeId, targetId) {
             const fromIndex = state.recipes.findIndex((item) => String(item.id) === String(activeId));
@@ -2024,6 +1663,28 @@
             const [moved] = state.recipes.splice(fromIndex, 1);
             state.recipes.splice(toIndex, 0, moved);
             normalizeSortOrder();
+        }
+
+        function moveRecipeUp(id) {
+            const index = state.recipes.findIndex((item) => String(item.id) === String(id));
+            if (index <= 0) return;
+            const [item] = state.recipes.splice(index, 1);
+            state.recipes.splice(index - 1, 0, item);
+            normalizeSortOrder();
+            persistLocal();
+            renderAll();
+            saveOrder().catch((e) => console.error(e));
+        }
+
+        function moveRecipeDown(id) {
+            const index = state.recipes.findIndex((item) => String(item.id) === String(id));
+            if (index < 0 || index >= state.recipes.length - 1) return;
+            const [item] = state.recipes.splice(index, 1);
+            state.recipes.splice(index + 1, 0, item);
+            normalizeSortOrder();
+            persistLocal();
+            renderAll();
+            saveOrder().catch((e) => console.error(e));
         }
 
         function normalizeSortOrder() {
