@@ -1725,8 +1725,12 @@
             state.drag.pointerId = event.pointerId;
             state.drag.pointerType = event.pointerType || "";
             if (event.pointerType === "touch") {
-                document.body.style.touchAction = "none";
+                if (els && els.list) els.list.style.touchAction = "none";
                 state.drag.touchActionDisabled = true;
+
+                if (card && card.setPointerCapture && state.drag.pointerId !== null) {
+                    try { card.setPointerCapture(state.drag.pointerId); } catch (e) { }
+                }
             }
             state.drag.startX = event.clientX;
             state.drag.currentX = event.clientX;
@@ -1953,8 +1957,13 @@
             stopAutoScrollLoop();
             document.body.style.userSelect = "";
             document.body.style.webkitUserSelect = "";
-            document.body.style.touchAction = "";
-            state.drag.touchActionDisabled = false;
+            if (state.drag.activeEl && state.drag.pointerId !== null && state.drag.activeEl.releasePointerCapture) {
+                try { state.drag.activeEl.releasePointerCapture(state.drag.pointerId); } catch (e) { }
+            }
+            if (state.drag.touchActionDisabled && els && els.list) {
+                els.list.style.touchAction = "";
+                state.drag.touchActionDisabled = false;
+            }
             els.list.classList.remove("is-dragging");
 
             if (state.drag.placeholderEl?.parentNode) {
@@ -2001,8 +2010,8 @@
                 clearTimeout(state.drag.timer);
                 state.drag.timer = null;
             }
-            if (state.drag.touchActionDisabled) {
-                document.body.style.touchAction = "";
+            if (state.drag.touchActionDisabled && els && els.list) {
+                els.list.style.touchAction = "";
                 state.drag.touchActionDisabled = false;
             }
         }
