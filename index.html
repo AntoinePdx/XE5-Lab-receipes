@@ -57,16 +57,28 @@
         }
 
         .topbar {
-            position: sticky;
-            top: constant(safe-area-inset-top);
+            position: fixed;
+            left: 50%;
             top: env(safe-area-inset-top);
-            z-index: 40;
+            transform: translateX(-50%) translateY(0);
+            z-index: 120;
+            width: min(100%, 860px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: calc(10px + env(safe-area-inset-top)) 0 12px;
+            padding: 10px 0;
             backdrop-filter: blur(16px);
+            transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
+            background: rgba(255, 253, 248, 0.85);
+            border-bottom: 1px solid rgba(32,27,23,0.06);
+            box-shadow: 0 8px 18px rgba(32,27,23,0.06);
+        }
+
+        .topbar.topbar--hidden {
+            transform: translateX(-50%) translateY(calc(-100% - 8px));
+            opacity: 0;
+            pointer-events: none;
         }
 
         .title-wrap small {
@@ -293,6 +305,16 @@
             text-transform: uppercase;
         }
 
+        .meta-tag {
+            border: 1px solid rgba(32, 27, 23, 0.14);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.96);
+            color: var(--ink);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         .meta-tag.slot-fs1 {
             border-color: rgba(0, 118, 176, 0.38);
             background: rgba(0, 118, 176, 0.14);
@@ -371,19 +393,6 @@
         }
 
         .menu-dropdown button:last-child { border-bottom: 0; color: var(--danger); }
-
-        /* Toast */
-        #toast-container { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 120; pointer-events: none; }
-        .toast {
-            pointer-events: auto;
-            background: rgba(32,27,23,0.9);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 10px;
-            margin-top: 8px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.24);
-            font-size: 0.95rem;
-        }
 
         /* Drag styles removed — reorder via menu actions */
 
@@ -627,12 +636,13 @@
             position: fixed;
             left: 50%;
             bottom: 0;
-            z-index: 50;
+            z-index: 140;
             width: min(100%, 860px);
             transform: translateX(-50%);
             padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-            background: transparent;
+            background: rgba(239, 227, 207, 0.78);
             backdrop-filter: blur(22px);
+            box-shadow: 0 24px 48px rgba(32,27,23,0.28);
         }
 
         .tabbar-inner {
@@ -640,10 +650,10 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             padding: 7px;
-            border: 1px solid rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 20px;
-            background: transparent;
-            box-shadow: 0 16px 34px rgba(32, 27, 23, 0.22);
+            background: rgba(34, 29, 25, 0.92);
+            box-shadow: 0 20px 40px rgba(32, 27, 23, 0.32);
         }
 
         .quick-picker {
@@ -816,7 +826,6 @@
     </style>
 </head>
 <body>
-    <div id="toast-container" aria-live="polite"></div>
     <main class="app">
         <header class="topbar">
             <div class="title-wrap">
@@ -1209,7 +1218,7 @@
             "name", "preset", "rating", "expo_compensation", "comment", "simulation", "grain_effect", "grain_size",
             "color_chrome_effect", "color_chrome_fx_blue", "smooth_skin_effect", "white_balance", "shift_red", "shift_blue",
             "dynamic_range", "d_range_priority", "highlights", "shadows", "color", "sharpness", "high_iso_nr", "clarity",
-            "image_urls", "image_thumb_urls", "favorite"
+            "image_urls", "favorite"
         ];
 
         const state = {
@@ -1261,12 +1270,43 @@
             renderEditorPhotos();
             loadNotes();
             bindEvents();
+            // Topbar layout and scroll behaviour
+            updateTopbarLayout();
+            attachTopbarScrollHandlers();
             await loadRecipes();
             renderAll();
             prepareNewRecipe(false);
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').then(() => console.log('ServiceWorker: registered')).catch(() => console.warn('ServiceWorker registration failed'));
+        }
+
+        function updateTopbarLayout() {
+            const topbar = document.querySelector('.topbar');
+            const app = document.querySelector('.app');
+            if (!topbar || !app) return;
+            const h = Math.ceil(topbar.getBoundingClientRect().height || 0);
+            // ensure some comfortable spacing
+            app.style.paddingTop = `${h + 8}px`;
+        }
+
+        function attachTopbarScrollHandlers() {
+            const topbar = document.querySelector('.topbar');
+            if (!topbar) return;
+            let lastY = window.scrollY || 0;
+            let rafId = null;
+            function onScroll() {
+                if (rafId) return;
+                rafId = window.requestAnimationFrame(() => {
+                    const y = window.scrollY || 0;
+                    const delta = y - lastY;
+                    if (Math.abs(delta) > 8) {
+                        if (delta > 0 && y > 80) topbar.classList.add('topbar--hidden');
+                        else if (delta < 0) topbar.classList.remove('topbar--hidden');
+                        lastY = y;
+                    }
+                    rafId = null;
+                });
             }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', updateTopbarLayout);
         }
 
         async function loadRecipes() {
@@ -1415,7 +1455,7 @@
                 return;
             }
 
-            els.list.innerHTML = recipes.map((recipe, idx) => {
+            els.list.innerHTML = recipes.map((recipe) => {
                 const id = escapeAttr(recipe.id);
                 const imageCount = recipe.image_urls.length;
                 const pageCount = Math.max(1, Math.ceil(imageCount / 3));
@@ -1423,18 +1463,15 @@
                 const pageIndex = imageCount > 3 ? clamp(savedPageIndex, 0, pageCount - 1) : 0;
                 state.cardPhotoIndexes[recipe.id] = pageIndex;
                 const pageStart = pageIndex * 3;
-                const sourceArray = (Array.isArray(recipe.image_thumb_urls) && recipe.image_thumb_urls.length) ? recipe.image_thumb_urls : recipe.image_urls;
-                const visibleImages = sourceArray.slice(pageStart, pageStart + 3);
+                const visibleImages = recipe.image_urls.slice(pageStart, pageStart + 3);
                 const photoClass = visibleImages.length === 1 ? "single" : visibleImages.length === 2 ? "double" : "triple";
                 const photoBadge = imageCount > 3
                     ? `${pageStart + 1}-${Math.min(pageStart + visibleImages.length, imageCount)}/${imageCount}`
                     : imageCount > 1 ? `${imageCount} photos` : "";
-                const shortComment = shorten(recipe.comment || "", 120);
+                const shortComment = shorten(recipe.comment || "", 120) || "Pas de commentaire";
                 const presetMeta = buildMetaControl("preset", "Slot", recipe.preset, id);
                 const ratingMeta = buildMetaControl("rating", "Note", recipe.rating, id);
                 const expoMeta = buildMetaControl("expo_compensation", "Expo", recipe.expo_compensation, id);
-
-                
 
                 return `
                     <article class="recipe-card" data-recipe-id="${id}">
@@ -1450,7 +1487,7 @@
                                     ${ratingMeta}
                                     ${expoMeta}
                                 </p>
-                                ${shortComment ? `<p class="summary-comment">${escapeHtml(shortComment)}</p>` : ''}
+                                <p class="summary-comment">${escapeHtml(shortComment)}</p>
                             </div>
                             <div class="card-menu">
                                 <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
@@ -1711,97 +1748,26 @@
             normalizeSortOrder();
         }
 
-        function animateListReorder(prevIds, newIds) {
-            try {
-                const list = els.list;
-                const oldRects = new Map();
-                for (const id of prevIds) {
-                    const node = list.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
-                    if (node) oldRects.set(id, node.getBoundingClientRect());
-                }
-
-                // Re-render list according to new state so DOM matches new order
-                renderRecipes();
-
-                // Apply FLIP animation from oldRects -> new positions
-                requestAnimationFrame(() => {
-                    for (const id of newIds) {
-                        const node = list.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
-                        if (!node) continue;
-                        const oldRect = oldRects.get(id);
-                        const newRect = node.getBoundingClientRect();
-                        if (!oldRect || !newRect) continue;
-                        const deltaY = oldRect.top - newRect.top;
-                        if (Math.abs(deltaY) < 0.5) continue;
-                        node.style.transform = `translateY(${deltaY}px)`;
-                        node.style.transition = 'transform 260ms cubic-bezier(.2,.9,.2,1)';
-                        // force reflow then animate to natural position
-                        node.getBoundingClientRect();
-                        requestAnimationFrame(() => {
-                            node.style.transform = '';
-                        });
-                        const clean = () => {
-                            node.style.transition = '';
-                            node.style.transform = '';
-                            node.removeEventListener('transitionend', clean);
-                        };
-                        node.addEventListener('transitionend', clean);
-                    }
-                });
-            }
-            catch (e) {
-                console.warn('FLIP reorder failed', e);
-                renderAll();
-            }
-        }
-
-        function showToast(text, duration = 3000) {
-            try {
-                const container = document.getElementById('toast-container');
-                if (!container) return;
-                const t = document.createElement('div');
-                t.className = 'toast';
-                t.textContent = text;
-                container.appendChild(t);
-                setTimeout(() => {
-                    t.style.opacity = '0';
-                    setTimeout(() => t.remove(), 260);
-                }, duration);
-            } catch (e) { /* no-op */ }
-        }
-
-        function haptic(ms = 10) {
-            try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { }
-        }
-
         function moveRecipeUp(id) {
-            const prevIds = visibleRecipes().map((r) => String(r.id));
             const index = state.recipes.findIndex((item) => String(item.id) === String(id));
             if (index <= 0) return;
             const [item] = state.recipes.splice(index, 1);
             state.recipes.splice(index - 1, 0, item);
             normalizeSortOrder();
-            const newIds = visibleRecipes().map((r) => String(r.id));
-            animateListReorder(prevIds, newIds);
             persistLocal();
+            renderAll();
             saveOrder().catch((e) => console.error(e));
-            haptic(12);
-            showToast('Recette déplacée');
         }
 
         function moveRecipeDown(id) {
-            const prevIds = visibleRecipes().map((r) => String(r.id));
             const index = state.recipes.findIndex((item) => String(item.id) === String(id));
             if (index < 0 || index >= state.recipes.length - 1) return;
             const [item] = state.recipes.splice(index, 1);
             state.recipes.splice(index + 1, 0, item);
             normalizeSortOrder();
-            const newIds = visibleRecipes().map((r) => String(r.id));
-            animateListReorder(prevIds, newIds);
             persistLocal();
+            renderAll();
             saveOrder().catch((e) => console.error(e));
-            haptic(12);
-            showToast('Recette déplacée');
         }
 
         function normalizeSortOrder() {
@@ -1945,7 +1911,7 @@
 
         function onSheetFieldChange(event) {
             const fieldNode = event.target.closest("[data-sheet-field]");
-            if (!fieldNode || !["INPUT", "TEXTAREA"].includes(fieldNode.tagName)) return;
+            if (!fieldNode || fieldNode.tagName === "TEXTAREA" || fieldNode.tagName === "INPUT") return;
             updateSheetRecipeField(fieldNode.dataset.sheetField, fieldNode.value).catch(reportSheetSaveError);
         }
 
@@ -1995,15 +1961,7 @@
             const recipe = currentSheetRecipe();
             if (!recipe) return;
 
-            const idx = recipe.image_urls.findIndex((item) => item === url);
-            if (idx >= 0) {
-                recipe.image_urls.splice(idx, 1);
-                if (Array.isArray(recipe.image_thumb_urls) && recipe.image_thumb_urls[idx]) {
-                    const thumbUrl = recipe.image_thumb_urls.splice(idx, 1)[0];
-                    // attempt to remove thumb as well
-                    await removeStoredImage(thumbUrl).catch((error) => console.warn("Thumb non supprime", error));
-                }
-            }
+            recipe.image_urls = recipe.image_urls.filter((item) => item !== url);
             recipe.updated_at = new Date().toISOString();
 
             await upsertRecipe(recipe);
@@ -2034,9 +1992,8 @@
             if (!recipe || !files.length) return;
 
             try {
-                const { uploadedUrls, thumbUrls } = await uploadFilesForRecipe(recipe.id, files);
+                const uploadedUrls = await uploadFilesForRecipe(recipe.id, files);
                 recipe.image_urls = [...new Set([...(recipe.image_urls || []), ...uploadedUrls])];
-                recipe.image_thumb_urls = [...new Set([...(recipe.image_thumb_urls || []), ...thumbUrls])];
                 recipe.updated_at = new Date().toISOString();
                 await upsertRecipe(recipe);
 
@@ -2055,10 +2012,8 @@
             if (!state.supabase) throw new Error("Upload disponible uniquement avec Supabase connecte.");
 
             const uploadedUrls = [];
-            const thumbUrls = [];
             for (const file of files) {
-                // full size
-                const prepared = await compressImageFile(file, 2200, 0.82);
+                const prepared = await compressImageFile(file);
                 const cleanName = slugifyFileName(prepared.name);
                 const path = `${recipeId}/${Date.now()}-${createId()}-${cleanName}`;
 
@@ -2071,25 +2026,8 @@
 
                 const { data } = state.supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
                 if (data?.publicUrl) uploadedUrls.push(data.publicUrl);
-
-                // thumbnail
-                try {
-                    const preparedThumb = await compressImageFile(file, 400, 0.72);
-                    const thumbName = slugifyFileName(preparedThumb.name);
-                    const thumbPath = `${recipeId}/thumbs/${Date.now()}-${createId()}-${thumbName}`;
-                    const { error: thumbError } = await state.supabase.storage.from(SUPABASE_BUCKET).upload(thumbPath, preparedThumb, {
-                        upsert: false,
-                        contentType: preparedThumb.type || "image/jpeg"
-                    });
-                    if (!thumbError) {
-                        const { data: thumbData } = state.supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(thumbPath);
-                        if (thumbData?.publicUrl) thumbUrls.push(thumbData.publicUrl);
-                    }
-                } catch (e) {
-                    console.warn("Thumb generation failed", e);
-                }
             }
-            return { uploadedUrls, thumbUrls };
+            return uploadedUrls;
         }
 
         async function removeStoredImage(url) {
@@ -2194,8 +2132,7 @@
 
         async function upsertRecipe(recipe) {
             if (!state.supabase) return;
-            const payload = normalizeRecipe(recipe);
-            const { error } = await state.supabase.from(SUPABASE_TABLE).upsert(payload);
+            const { error } = await state.supabase.from(SUPABASE_TABLE).upsert(recipe);
             if (error) throw error;
         }
 
@@ -2255,7 +2192,7 @@
 
             try {
                 setUploadStatus("Upload en cours...", "");
-                const { uploadedUrls } = await uploadFilesForRecipe(recipeId, files);
+                const uploadedUrls = await uploadFilesForRecipe(recipeId, files);
 
                 const existing = splitImages($("#image_urls").value);
                 const merged = [...new Set([...existing, ...uploadedUrls])];
@@ -2272,11 +2209,12 @@
             }
         }
 
-        async function compressImageFile(file, maxDimension = 2200, quality = 0.82) {
+        async function compressImageFile(file) {
             if (!file.type.startsWith("image/")) return file;
 
             try {
                 const image = await fileToImage(file);
+                const maxDimension = 2200;
                 const ratio = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
                 const width = Math.max(1, Math.round(image.naturalWidth * ratio));
                 const height = Math.max(1, Math.round(image.naturalHeight * ratio));
@@ -2290,7 +2228,7 @@
 
                 ctx.drawImage(image, 0, 0, width, height);
 
-                const blob = await canvasToBlob(canvas, "image/jpeg", quality);
+                const blob = await canvasToBlob(canvas, "image/jpeg", 0.82);
                 if (!blob) return file;
 
                 const finalName = replaceFileExtension(file.name, "jpg");
@@ -2387,7 +2325,6 @@
                 high_iso_nr: COLOR_OPTIONS.includes(String(recipe.high_iso_nr || "")) ? String(recipe.high_iso_nr) : "",
                 clarity: CLARITY_OPTIONS.includes(String(recipe.clarity || "")) ? String(recipe.clarity) : "",
                 image_urls: splitImages(recipe.image_urls),
-                image_thumb_urls: splitImages(recipe.image_thumb_urls),
                 favorite: truthy(recipe.favorite)
             };
         }
