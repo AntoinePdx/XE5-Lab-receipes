@@ -291,7 +291,12 @@
             font-size: 0.6rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            notesTimer: null
+        }
+
+        .meta-tag.slot-fs1 {
+            border-color: rgba(0, 118, 176, 0.38);
+            background: rgba(0, 118, 176, 0.14);
+            color: #0a4c6d;
         }
 
         .meta-tag.slot-fs2 {
@@ -1430,8 +1435,8 @@
                             <div class="card-menu">
                                 <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
                                 <div class="menu-dropdown" data-menu="${id}">
-                                    <button type="button" data-move-up="${id}">Monter</button>
-                                    <button type="button" data-move-down="${id}">Descendre</button>
+                                    <button type="button" data-move-up="${id}">⬆️</button>
+                                    <button type="button" data-move-down="${id}">⬇️</button>
                                     <button type="button" data-delete="${id}">Supprimer</button>
                                 </div>
                             </div>
@@ -1522,11 +1527,32 @@
         function cycleCardPhoto(id) {
             const recipe = state.recipes.find((item) => String(item.id) === String(id));
             if (!recipe || recipe.image_urls.length <= 3) return false;
-
             const pageCount = Math.ceil(recipe.image_urls.length / 3);
             const current = Number(state.cardPhotoIndexes[recipe.id] || 0);
-            state.cardPhotoIndexes[recipe.id] = (current + 1) % pageCount;
-            renderRecipes();
+            const next = (current + 1) % pageCount;
+            state.cardPhotoIndexes[recipe.id] = next;
+
+            // Update only the clicked card DOM to avoid reloading all images
+            const card = document.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
+            if (!card) {
+                renderRecipes();
+                return true;
+            }
+
+            const pageStart = next * 3;
+            const visibleImages = recipe.image_urls.slice(pageStart, pageStart + 3);
+            const photoClass = visibleImages.length === 1 ? "single" : visibleImages.length === 2 ? "double" : "triple";
+            const photoBadge = recipe.image_urls.length > 3
+                ? `${pageStart + 1}-${Math.min(pageStart + visibleImages.length, recipe.image_urls.length)}/${recipe.image_urls.length}`
+                : recipe.image_urls.length > 1 ? `${recipe.image_urls.length} photos` : "";
+
+            const photoWrap = card.querySelector('.summary-photo');
+            if (photoWrap) {
+                photoWrap.className = `summary-photo ${photoClass}`;
+                photoWrap.dataset.cardPhoto = id;
+                photoWrap.innerHTML = visibleImages.map((url, index) => `<img src="${escapeAttr(url)}" alt="Photo ${escapeAttr(recipe.name || "recette")} ${pageStart + index + 1}" loading="lazy">`).join("") + (photoBadge ? `<span class="photo-count-badge">${escapeHtml(photoBadge)}</span>` : "");
+            }
+
             return true;
         }
 
