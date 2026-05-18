@@ -372,14 +372,6 @@
 
         .menu-dropdown button:last-child { border-bottom: 0; color: var(--danger); }
 
-        .menu-dropdown button[disabled] {
-            opacity: 0.46;
-            pointer-events: none;
-            color: var(--muted);
-        }
-
-        .recipe-card { transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms ease; }
-
         /* Toast */
         #toast-container { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 120; pointer-events: none; }
         .toast {
@@ -639,7 +631,7 @@
             width: min(100%, 860px);
             transform: translateX(-50%);
             padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-            background: rgba(239, 227, 207, 0.78);
+            background: transparent;
             backdrop-filter: blur(22px);
         }
 
@@ -650,7 +642,7 @@
             padding: 7px;
             border: 1px solid rgba(255, 255, 255, 0.75);
             border-radius: 20px;
-            background: rgba(34, 29, 25, 0.9);
+            background: transparent;
             box-shadow: 0 16px 34px rgba(32, 27, 23, 0.22);
         }
 
@@ -1442,8 +1434,7 @@
                 const ratingMeta = buildMetaControl("rating", "Note", recipe.rating, id);
                 const expoMeta = buildMetaControl("expo_compensation", "Expo", recipe.expo_compensation, id);
 
-                const upDisabled = idx === 0 ? 'disabled aria-disabled="true"' : '';
-                const downDisabled = idx === recipes.length - 1 ? 'disabled aria-disabled="true"' : '';
+                
 
                 return `
                     <article class="recipe-card" data-recipe-id="${id}">
@@ -1464,8 +1455,8 @@
                             <div class="card-menu">
                                 <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
                                 <div class="menu-dropdown" data-menu="${id}">
-                                    <button type="button" data-move-up="${id}" ${upDisabled}>⬆️</button>
-                                    <button type="button" data-move-down="${id}" ${downDisabled}>⬇️</button>
+                                    <button type="button" data-move-up="${id}">⬆️</button>
+                                    <button type="button" data-move-down="${id}">⬇️</button>
                                     <button type="button" data-delete="${id}">Supprimer</button>
                                 </div>
                             </div>
@@ -1723,30 +1714,29 @@
         function animateListReorder(prevIds, newIds) {
             try {
                 const list = els.list;
-                const rects = new Map();
+                const oldRects = new Map();
                 for (const id of prevIds) {
                     const node = list.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
-                    if (node) rects.set(id, node.getBoundingClientRect());
+                    if (node) oldRects.set(id, node.getBoundingClientRect());
                 }
 
-                // reorder DOM nodes in-place according to newIds
-                for (const id of newIds) {
-                    const node = list.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
-                    if (node) list.appendChild(node);
-                }
+                // Re-render list according to new state so DOM matches new order
+                renderRecipes();
 
-                // apply FLIP animation
+                // Apply FLIP animation from oldRects -> new positions
                 requestAnimationFrame(() => {
                     for (const id of newIds) {
                         const node = list.querySelector(`.recipe-card[data-recipe-id="${cssEscape(id)}"]`);
                         if (!node) continue;
-                        const oldRect = rects.get(id);
+                        const oldRect = oldRects.get(id);
                         const newRect = node.getBoundingClientRect();
-                        if (!oldRect) continue;
+                        if (!oldRect || !newRect) continue;
                         const deltaY = oldRect.top - newRect.top;
                         if (Math.abs(deltaY) < 0.5) continue;
-                        node.style.transition = 'transform 260ms cubic-bezier(.2,.9,.2,1)';
                         node.style.transform = `translateY(${deltaY}px)`;
+                        node.style.transition = 'transform 260ms cubic-bezier(.2,.9,.2,1)';
+                        // force reflow then animate to natural position
+                        node.getBoundingClientRect();
                         requestAnimationFrame(() => {
                             node.style.transform = '';
                         });
@@ -1955,7 +1945,7 @@
 
         function onSheetFieldChange(event) {
             const fieldNode = event.target.closest("[data-sheet-field]");
-            if (!fieldNode || fieldNode.tagName === "TEXTAREA" || fieldNode.tagName === "INPUT") return;
+            if (!fieldNode || !["INPUT", "TEXTAREA"].includes(fieldNode.tagName)) return;
             updateSheetRecipeField(fieldNode.dataset.sheetField, fieldNode.value).catch(reportSheetSaveError);
         }
 
@@ -2204,7 +2194,8 @@
 
         async function upsertRecipe(recipe) {
             if (!state.supabase) return;
-            const { error } = await state.supabase.from(SUPABASE_TABLE).upsert(recipe);
+            const payload = normalizeRecipe(recipe);
+            const { error } = await state.supabase.from(SUPABASE_TABLE).upsert(payload);
             if (error) throw error;
         }
 
