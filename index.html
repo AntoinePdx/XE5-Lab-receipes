@@ -661,6 +661,21 @@
             transform: translateY(6px); /* lower the inner oval */
         }
 
+        /* Page bleed overlays to hide the decorative background outside the app */
+        .page-bleed {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(100%, 860px);
+            pointer-events: none;
+            z-index: 110;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(18px);
+        }
+
+        .page-bleed-top { top: 0; height: 0; }
+        .page-bleed-bottom { bottom: 0; height: 0; }
+
         .quick-picker {
             position: fixed;
             z-index: 95;
@@ -1198,6 +1213,9 @@
         </div>
     </nav>
 
+    <div class="page-bleed page-bleed-top" aria-hidden="true"></div>
+    <div class="page-bleed page-bleed-bottom" aria-hidden="true"></div>
+
     <script>
         const SUPABASE_URL = "https://aektdwxuviggksjiozme.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_tY7csu_3SswZ1iShZeIweg_HfpUeohn";
@@ -1283,6 +1301,30 @@
             prepareNewRecipe(false);
         }
 
+        function updateBleedAreas() {
+            const topbar = document.querySelector('.topbar');
+            const tabbar = document.querySelector('.tabbar');
+            const topBleed = document.querySelector('.page-bleed-top');
+            const bottomBleed = document.querySelector('.page-bleed-bottom');
+
+            if (topBleed) {
+                const topHeight = topbar ? Math.max(0, Math.round(topbar.getBoundingClientRect().top)) : 0;
+                topBleed.style.height = `${topHeight}px`;
+                topBleed.style.top = '0';
+            }
+
+            if (bottomBleed) {
+                if (tabbar) {
+                    const tabRect = tabbar.getBoundingClientRect();
+                    const bottomHeight = Math.max(0, Math.round(window.innerHeight - tabRect.top));
+                    bottomBleed.style.height = `${bottomHeight}px`;
+                    bottomBleed.style.bottom = '0';
+                } else {
+                    bottomBleed.style.height = '0px';
+                }
+            }
+        }
+
         function updateTopbarLayout() {
             const topbar = document.querySelector('.topbar');
             const app = document.querySelector('.app');
@@ -1291,6 +1333,7 @@
             // compute padding so content starts below the header + iOS safe inset
             const pad = Math.ceil(Math.max(rect.bottom, rect.height) + 8);
             app.style.paddingTop = `${pad}px`;
+            updateBleedAreas();
         }
 
         function attachTopbarScrollHandlers() {
@@ -1313,6 +1356,7 @@
             }
             window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', updateTopbarLayout);
+            window.addEventListener('resize', updateBleedAreas);
         }
 
         async function loadRecipes() {
