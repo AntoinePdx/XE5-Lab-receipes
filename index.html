@@ -653,10 +653,11 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             padding: 7px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
+            border: none; /* remove white outline */
             border-radius: 20px;
             background: rgba(34, 29, 25, 0.92); /* dark inner oval restored */
             box-shadow: 0 20px 40px rgba(32, 27, 23, 0.32);
+            transform: translateY(6px); /* lower the inner oval */
         }
 
         .quick-picker {
