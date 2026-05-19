@@ -27,8 +27,7 @@
             --dark: #221d19;
             --cream: #fffaf0;
             --shadow: 0 12px 30px rgba(66, 42, 20, 0.12);
-              --danger: #5e2d23;
-              --global-top-padding: 1px;
+            --danger: #5e2d23;
         }
 
         * { box-sizing: border-box; }
@@ -78,6 +77,9 @@
             justify-content: space-between;
             gap: 12px;
             margin-bottom: 10px;
+            background: rgba(255, 250, 240, 0.03);
+            padding: 8px 0;
+            border-radius: 10px;
         }
 
         .page-header .top-meta {
@@ -94,18 +96,18 @@
             display: block;
             color: var(--muted);
             font-family: "IBM Plex Mono", monospace;
-            font-size: 0.68rem;
+            font-size: 0.78rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
         .title-wrap strong {
             font-family: "Fraunces", serif;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             line-height: 1;
         }
 
-        .title-wrap { margin-left: 8px; }
+        .title-wrap { margin-left: 0; }
         .top-meta { margin-right: 8px; }
 
         .top-meta {
@@ -820,11 +822,11 @@
 
         @media (max-width: 680px) {
             .app { padding-top: calc(max(8px, env(safe-area-inset-top)) + var(--global-top-padding)); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
-            .page-header { padding: calc(7px + var(--global-top-padding)) 8px 8px; }
+            .page-header { padding: calc(7px + var(--global-top-padding)) 0 8px; }
             /* Mobile: lower the tabbar a bit for thumb reach */
             .tabbar { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
             .tabbar-inner { transform: translateY(12px); }
-            .title-wrap strong { font-size: 1.05rem; }
+            .title-wrap strong { font-size: 1.12rem; }
             .recipe-list { grid-template-columns: 1fr; }
             .summary-photo { height: clamp(150px, 44vw, 190px); }
             .summary-main h3 { font-size: 0.94rem; }
