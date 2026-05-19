@@ -51,26 +51,23 @@
         button { -webkit-tap-highlight-color: transparent; }
 
         .topbar {
-            position: fixed;
-            left: 50%;
+            position: sticky;
             top: calc(env(safe-area-inset-top) + var(--global-top-padding));
-            transform: translateX(-50%) translateY(0);
-            z-index: 120;
-            width: min(100%, 860px);
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 12px 10px; /* internal padding (top is handled by top) */
-            backdrop-filter: blur(18px);
-            transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
-            background: rgba(255, 255, 255, 0.06); /* transparent + blur */
-            border-bottom: none;
-            box-shadow: 0 6px 18px rgba(32,27,23,0.06);
+            padding: 10px 12px 10px;
+            background: transparent;
+            backdrop-filter: none;
+            border-bottom: 1px solid var(--line);
+            box-shadow: none;
+            transition: opacity 220ms ease;
         }
 
         .topbar.topbar--hidden {
-            transform: translateX(-50%) translateY(calc(-100% - 8px));
+            transform: translateY(calc(-100% - 8px));
             opacity: 0;
             pointer-events: none;
         }
@@ -115,22 +112,19 @@
         .view.active { display: block; }
 
         .topbar {
-            position: fixed;
-            left: 50%;
+            position: sticky;
             top: calc(env(safe-area-inset-top) + var(--global-top-padding));
-            transform: translateX(-50%) translateY(0);
-            z-index: 120;
-            width: min(100%, 860px);
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 12px 10px; /* internal padding (global padding applied to top) */
-            backdrop-filter: blur(18px);
-            transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
-            background: rgba(255, 255, 255, 0.06); /* transparent + blur */
-            border-bottom: none;
-            box-shadow: 0 6px 18px rgba(32,27,23,0.06);
+            padding: 10px 12px 10px; /* internal padding (top accounted by top) */
+            background: transparent; /* integrated look */
+            backdrop-filter: none;
+            border-bottom: 1px solid var(--line);
+            box-shadow: none;
+            transition: opacity 220ms ease;
         }
         .section-head h2 { margin: 0; font-family: "Fraunces", serif; font-size: 1.16rem; }
         .section-head span { color: var(--muted); font-size: 0.78rem; }
@@ -1275,8 +1269,7 @@
             renderEditorPhotos();
             loadNotes();
             bindEvents();
-            // Topbar layout and scroll behaviour
-            updateTopbarLayout();
+            // Topbar scroll behaviour (sticky header is in-flow)
             attachTopbarScrollHandlers();
             await loadRecipes();
             renderAll();
