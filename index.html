@@ -27,8 +27,8 @@
             --dark: #221d19;
             --cream: #fffaf0;
             --shadow: 0 12px 30px rgba(66, 42, 20, 0.12);
-            --danger: #5e2d23;
-            --global-top-padding: 8px;
+              --danger: #5e2d23;
+              --global-top-padding: 6px;
         }
 
         * { box-sizing: border-box; }
@@ -646,7 +646,7 @@
             z-index: 140;
             width: min(100%, 860px);
             transform: translateX(-50%);
-            padding: 10px 12px 10px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
             background: transparent; /* outer background invisible */
             backdrop-filter: none;
             box-shadow: none;
@@ -819,6 +819,9 @@
         @media (max-width: 680px) {
             .app { padding-top: calc(max(8px, env(safe-area-inset-top)) + var(--global-top-padding)); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
             .topbar { padding: calc(7px + var(--global-top-padding)) 0 8px; }
+            /* Mobile: lower the tabbar a bit for thumb reach */
+            .tabbar { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+            .tabbar-inner { transform: translateY(12px); }
             .title-wrap strong { font-size: 1.05rem; }
             .recipe-list { grid-template-columns: 1fr; }
             .summary-photo { height: clamp(150px, 44vw, 190px); }
