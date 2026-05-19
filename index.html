@@ -50,27 +50,20 @@
         button, input, select, textarea { font: inherit; }
         button { -webkit-tap-highlight-color: transparent; }
 
-        .app {
-            width: min(100%, 860px);
-            min-height: 100vh;
-            margin: 0 auto;
-            padding-top: var(--global-top-padding);
-            padding-right: 10px;
-            padding-bottom: calc(86px + env(safe-area-inset-bottom));
-            padding-left: 10px;
-        }
-
         .topbar {
-            position: relative;
-            margin: 0 auto;
+            position: fixed;
+            left: 50%;
+            top: calc(env(safe-area-inset-top) + var(--global-top-padding));
+            transform: translateX(-50%) translateY(0);
+            z-index: 120;
             width: min(100%, 860px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: calc(env(safe-area-inset-top) + var(--global-top-padding)) 12px 10px; /* top includes safe-area */
+            padding: 10px 12px 10px; /* internal padding (top is handled by top) */
             backdrop-filter: blur(18px);
-            transition: opacity 200ms ease;
+            transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
             background: rgba(255, 255, 255, 0.06); /* transparent + blur */
             border-bottom: none;
             box-shadow: 0 6px 18px rgba(32,27,23,0.06);
@@ -814,8 +807,8 @@
         .tab-btn.active { background: var(--cream); color: var(--ink); }
 
         @media (max-width: 680px) {
-            .app { padding-top: var(--global-top-padding); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
-            .topbar { padding: calc(env(safe-area-inset-top) + var(--global-top-padding)) 8px 8px; }
+            .app { padding-top: calc(max(8px, env(safe-area-inset-top)) + var(--global-top-padding)); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
+            .topbar { padding: calc(7px + var(--global-top-padding)) 8px 8px; }
             /* Mobile: lower the tabbar a bit for thumb reach */
             .tabbar { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
             .tabbar-inner { transform: translateY(12px); }
@@ -1282,6 +1275,9 @@
             renderEditorPhotos();
             loadNotes();
             bindEvents();
+            // Topbar layout and scroll behaviour
+            updateTopbarLayout();
+            attachTopbarScrollHandlers();
             await loadRecipes();
             renderAll();
             prepareNewRecipe(false);
