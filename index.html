@@ -28,7 +28,7 @@
             --cream: #fffaf0;
             --shadow: 0 12px 30px rgba(66, 42, 20, 0.12);
             --danger: #5e2d23;
-            --global-top-padding: 6px;
+            --global-top-padding: 4px;
         }
 
         * { box-sizing: border-box; }
@@ -1491,7 +1491,7 @@
                 const photoBadge = imageCount > 3
                     ? `${pageStart + 1}-${Math.min(pageStart + visibleImages.length, imageCount)}/${imageCount}`
                     : imageCount > 1 ? `${imageCount} photos` : "";
-                const shortComment = shorten(recipe.comment || "", 120) || "Pas de commentaire";
+                const shortComment = shorten(recipe.comment || "", 120) || "";
                 const presetMeta = buildMetaControl("preset", "Slot", recipe.preset, id);
                 const ratingMeta = buildMetaControl("rating", "Note", recipe.rating, id);
                 const expoMeta = buildMetaControl("expo_compensation", "Expo", recipe.expo_compensation, id);
@@ -1510,7 +1510,7 @@
                                     ${ratingMeta}
                                     ${expoMeta}
                                 </p>
-                                <p class="summary-comment">${escapeHtml(shortComment)}</p>
+                                ${shortComment ? `<p class="summary-comment">${escapeHtml(shortComment)}</p>` : ""}
                             </div>
                             <div class="card-menu">
                                 <button class="menu-toggle" type="button" data-menu-toggle="${id}" aria-label="Actions">⋯</button>
