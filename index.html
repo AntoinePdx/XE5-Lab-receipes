@@ -72,6 +72,14 @@
             pointer-events: none;
         }
 
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
         .title-wrap small {
             display: block;
             color: var(--muted);
@@ -802,7 +810,7 @@
 
         @media (max-width: 680px) {
             .app { padding-top: calc(max(8px, env(safe-area-inset-top)) + var(--global-top-padding)); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
-            .topbar { padding: calc(7px + var(--global-top-padding)) 8px 8px; }
+            .page-header { padding: calc(7px + var(--global-top-padding)) 8px 8px; }
             /* Mobile: lower the tabbar a bit for thumb reach */
             .tabbar { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
             .tabbar-inner { transform: translateY(12px); }
@@ -824,7 +832,7 @@
 </head>
 <body>
     <main class="app">
-        <header class="topbar">
+        <div class="page-header">
             <div class="title-wrap">
                 <small>X-E5 Lab</small>
                 <strong>Fuji Recipes</strong>
@@ -833,7 +841,7 @@
                 <div class="stat-pill" id="count-total">0 recettes</div>
                 <div class="sync-pill" id="sync-status">local</div>
             </div>
-        </header>
+        </div>
 
         <section class="view active" id="view-recipes">
             <div class="panel">
