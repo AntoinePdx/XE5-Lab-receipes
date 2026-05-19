@@ -441,7 +441,7 @@
         .recipe-sheet {
             position: fixed;
             inset: 0;
-            z-index: 90;
+            z-index: 260;
             display: none;
             background: var(--cream);
             padding: env(safe-area-inset-top) 0 0 0;
@@ -667,6 +667,14 @@
             background: rgba(34, 29, 25, 0.92); /* dark inner oval restored */
             box-shadow: 0 20px 40px rgba(32, 27, 23, 0.32);
             transform: translateY(6px); /* lower the inner oval */
+        }
+
+        /* When the recipe sheet is open, hide the bottom tabbar so it doesn't cover inputs */
+        .recipe-sheet.open ~ .tabbar {
+            transform: translateX(-50%) translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 200ms ease;
         }
 
         /* removed page-bleed overlays per user request */
