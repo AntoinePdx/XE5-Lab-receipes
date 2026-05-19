@@ -28,6 +28,7 @@
             --cream: #fffaf0;
             --shadow: 0 12px 30px rgba(66, 42, 20, 0.12);
             --danger: #5e2d23;
+            --global-top-padding: 12px;
         }
 
         * { box-sizing: border-box; }
@@ -53,7 +54,10 @@
             width: min(100%, 860px);
             min-height: 100vh;
             margin: 0 auto;
-            padding: max(10px, env(safe-area-inset-top)) 10px calc(86px + env(safe-area-inset-bottom));
+            padding-top: calc(max(10px, env(safe-area-inset-top)) + var(--global-top-padding));
+            padding-right: 10px;
+            padding-bottom: calc(86px + env(safe-area-inset-bottom));
+            padding-left: 10px;
         }
 
         .topbar {
@@ -67,7 +71,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 12px 10px; /* internal padding only */
+            padding: calc(10px + var(--global-top-padding)) 12px 10px; /* internal padding + extra top */
             backdrop-filter: blur(18px);
             transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
             background: rgba(255, 255, 255, 0.06); /* transparent + blur */
@@ -131,7 +135,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 10px 12px 10px; /* internal padding only */
+            padding: calc(10px + var(--global-top-padding)) 12px 10px; /* internal padding + extra top */
             backdrop-filter: blur(18px);
             transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
             background: rgba(255, 255, 255, 0.06); /* transparent + blur */
@@ -813,8 +817,8 @@
         .tab-btn.active { background: var(--cream); color: var(--ink); }
 
         @media (max-width: 680px) {
-            .app { padding: max(8px, env(safe-area-inset-top)) 8px calc(78px + env(safe-area-inset-bottom)); }
-            .topbar { padding: 7px 0 8px; }
+            .app { padding-top: calc(max(8px, env(safe-area-inset-top)) + var(--global-top-padding)); padding-right: 8px; padding-bottom: calc(78px + env(safe-area-inset-bottom)); padding-left: 8px; }
+            .topbar { padding: calc(7px + var(--global-top-padding)) 0 8px; }
             .title-wrap strong { font-size: 1.05rem; }
             .recipe-list { grid-template-columns: 1fr; }
             .summary-photo { height: clamp(150px, 44vw, 190px); }
