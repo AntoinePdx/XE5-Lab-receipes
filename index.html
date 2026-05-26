@@ -345,6 +345,12 @@
             color: #7a4600;
         }
 
+        .meta-tag.slot-c {
+            border-color: rgba(111, 66, 193, 0.38);
+            background: rgba(111, 66, 193, 0.14);
+            color: #4f2e8f;
+        }
+
         .meta-control.is-muted {
             opacity: 0.42;
             background: rgba(32, 27, 23, 0.03);
@@ -1222,7 +1228,7 @@
         const LOCAL_KEY = "fuji-xe5-recipes-v3";
         const NOTES_KEY = "fuji-xe5-free-notes-v1";
 
-        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3"];
+        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3", "C"];
         const EXPO_OPTIONS = ["-2 to -3", "-1 to -2", "-1/3 to -1", "0", "1/3 to 1", "1 to 2", "2 to 3"];
         const FILM_OPTIONS = ["Provia", "Velvia", "Astia", "Classic Chrome", "Reala Ace", "Pro Neg Hi", "Pro Neg Std", "Classic Neg", "Nostalgic Neg", "Eterna", "Eterna Bleach Bypass", "Acros", "Monochrome", "Sepia"];
         const SIMPLE_LEVEL = ["Off", "Weak", "Strong"];
@@ -1466,7 +1472,8 @@
             if (slot === "FS1") return 0;
             if (slot === "FS2") return 1;
             if (slot === "FS3") return 2;
-            return 3;
+            if (slot === "C") return 3;
+            return 4;
         }
 
         function renderRecipes() {
@@ -1757,6 +1764,7 @@
             if (value === "FS1") return "slot-fs1";
             if (value === "FS2") return "slot-fs2";
             if (value === "FS3") return "slot-fs3";
+            if (value === "C") return "slot-c";
             return "";
         }
         // Drag-and-drop reordering removed — use menu actions (Monter/Descendre)
