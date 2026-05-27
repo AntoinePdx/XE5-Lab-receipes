@@ -1317,7 +1317,7 @@
         const LOCAL_KEY = "fuji-xe5-recipes-v3";
         const NOTES_KEY = "fuji-xe5-free-notes-v1";
 
-        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3", "C"];
+        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3", "C1", "C2", "C3", "C4", "C5", "C6", "C7"];
         const EXPO_OPTIONS = ["-2 to -3", "-1 to -2", "-1/3 to -1", "0", "1/3 to 1", "1 to 2", "2 to 3"];
         const FILM_OPTIONS = ["Provia", "Velvia", "Astia", "Classic Chrome", "Reala Ace", "Pro Neg Hi", "Pro Neg Std", "Classic Neg", "Nostalgic Neg", "Eterna", "Eterna Bleach Bypass", "Acros", "Monochrome", "Sepia"];
         const SIMPLE_LEVEL = ["Off", "Weak", "Strong"];
@@ -1599,8 +1599,14 @@
             if (slot === "FS1") return 0;
             if (slot === "FS2") return 1;
             if (slot === "FS3") return 2;
-            if (slot === "C") return 3;
-            return 4;
+            if (slot === "C1") return 3;
+            if (slot === "C2") return 4;
+            if (slot === "C3") return 5;
+            if (slot === "C4") return 6;
+            if (slot === "C5") return 7;
+            if (slot === "C6") return 8;
+            if (slot === "C7") return 9;
+            return 10;
         }
 
         function renderRecipes() {
@@ -1904,7 +1910,7 @@
             if (value === "FS1") return "slot-fs1";
             if (value === "FS2") return "slot-fs2";
             if (value === "FS3") return "slot-fs3";
-            if (value === "C") return "slot-c";
+            if (/^C[1-7]$/.test(String(value || ""))) return "slot-c";
             return "";
         }
         // Drag-and-drop reordering removed — use menu actions (Monter/Descendre)

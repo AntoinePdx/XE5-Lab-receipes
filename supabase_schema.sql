@@ -65,7 +65,7 @@ returns trigger
 language plpgsql
 as $$
 begin
-    if new.preset in ('FS1', 'FS2', 'FS3', 'C') then
+    if new.preset in ('FS1', 'FS2', 'FS3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7') then
         update public.film_recipes
         set preset = ''
         where preset = new.preset
@@ -215,7 +215,13 @@ insert into public.recipe_parameter_options (
 ('preset', 'FS1', 'FS1', 10),
 ('preset', 'FS2', 'FS2', 20),
 ('preset', 'FS3', 'FS3', 30),
-('preset', 'C', 'C', 40),
+('preset', 'C1', 'C1', 40),
+('preset', 'C2', 'C2', 50),
+('preset', 'C3', 'C3', 60),
+('preset', 'C4', 'C4', 70),
+('preset', 'C5', 'C5', 80),
+('preset', 'C6', 'C6', 90),
+('preset', 'C7', 'C7', 100),
 ('expo_compensation', '-2 to -3', '-2 to -3', 10),
 ('expo_compensation', '-1 to -2', '-1 to -2', 20),
 ('expo_compensation', '-1/3 to -1', '-1/3 to -1', 30),
