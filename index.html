@@ -665,7 +665,7 @@
 
         .tabbar-inner {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
             padding: 7px;
             border: none; /* remove white outline */
@@ -815,6 +815,66 @@
             font-size: 0.78rem;
         }
 
+        .compare-wrap {
+            display: grid;
+            gap: 10px;
+        }
+
+        .compare-controls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .compare-summary {
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .compare-table-wrap {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: auto;
+            background: rgba(255, 253, 248, 0.9);
+        }
+
+        .compare-table {
+            width: 100%;
+            min-width: 620px;
+            border-collapse: collapse;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 9px 10px;
+            border-bottom: 1px solid rgba(32, 27, 23, 0.1);
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.82rem;
+        }
+
+        .compare-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: rgba(255, 248, 236, 0.98);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .compare-table tbody th {
+            width: 170px;
+            background: rgba(32, 27, 23, 0.03);
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .compare-table tr.diff td {
+            background: rgba(182, 75, 45, 0.08);
+        }
+
         .tab-btn {
             min-height: 48px;
             border: 0;
@@ -847,6 +907,7 @@
             .sheet-head { padding: 9px; }
             .guide-head { align-items: start; }
             .guide-grid { grid-template-columns: 1fr; }
+            .compare-controls { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1024,6 +1085,33 @@
                         <button class="primary-btn" type="submit">Enregistrer</button>
                     </div>
                 </form>
+            </div>
+        </section>
+
+        <section class="view" id="view-compare">
+            <div class="panel">
+                <div class="section-head"><h2>Comparer</h2><span>jusqu'a 3 recettes</span></div>
+                <div class="compare-wrap">
+                    <div class="compare-controls">
+                        <div class="field">
+                            <label for="compare-1">Recette 1</label>
+                            <select id="compare-1" data-compare-index="0"></select>
+                        </div>
+                        <div class="field">
+                            <label for="compare-2">Recette 2</label>
+                            <select id="compare-2" data-compare-index="1"></select>
+                        </div>
+                        <div class="field">
+                            <label for="compare-3">Recette 3</label>
+                            <select id="compare-3" data-compare-index="2"></select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="action-btn" type="button" id="compare-clear">Reinitialiser la comparaison</button>
+                    </div>
+                    <div class="compare-summary" id="compare-summary">Choisis jusqu'a 3 recettes.</div>
+                    <div class="compare-table-wrap" id="compare-table-wrap"></div>
+                </div>
             </div>
         </section>
 
@@ -1213,6 +1301,7 @@
         <div class="tabbar-inner">
             <button class="tab-btn active" type="button" data-view="recipes"><span>◧</span>Recettes</button>
             <button class="tab-btn" type="button" data-view="editor"><span>＋</span>Ajouter</button>
+            <button class="tab-btn" type="button" data-view="compare"><span>⇄</span>Comparer</button>
             <button class="tab-btn" type="button" data-view="guide"><span>?</span>Guide</button>
             <button class="tab-btn" type="button" data-view="notes"><span>✎</span>Notes</button>
         </div>
@@ -1248,6 +1337,29 @@
             "image_urls", "favorite"
         ];
 
+        const COMPARE_FIELDS = [
+            { key: "preset", label: "Slot" },
+            { key: "rating", label: "Note" },
+            { key: "expo_compensation", label: "Expo" },
+            { key: "simulation", label: "Film" },
+            { key: "white_balance", label: "White Balance" },
+            { key: "shift_red", label: "Shift Red" },
+            { key: "shift_blue", label: "Shift Blue" },
+            { key: "dynamic_range", label: "Dynamic Range" },
+            { key: "d_range_priority", label: "D-Range Prio" },
+            { key: "highlights", label: "Highlights" },
+            { key: "shadows", label: "Shadows" },
+            { key: "color", label: "Color" },
+            { key: "sharpness", label: "Sharpness" },
+            { key: "high_iso_nr", label: "High ISO NR" },
+            { key: "clarity", label: "Clarity" },
+            { key: "grain_effect", label: "Grain" },
+            { key: "grain_size", label: "Grain Size" },
+            { key: "color_chrome_effect", label: "Color Chrome FX" },
+            { key: "color_chrome_fx_blue", label: "Color Chrome Blue" },
+            { key: "smooth_skin_effect", label: "Smooth Skin FX" }
+        ];
+
         const state = {
             recipes: [],
             supabase: null,
@@ -1255,7 +1367,8 @@
             quickPicker: { open: false, recipeId: "", field: "" },
             sheetRecipeId: "",
             cardPhotoIndexes: {},
-            notesTimer: null
+            notesTimer: null,
+            compareIds: ["", "", ""]
         };
 
         const $ = (selector) => document.querySelector(selector);
@@ -1285,7 +1398,13 @@
             notesStatus: $("#notes-status"),
             quickPicker: $("#quick-picker"),
             quickPickerTitle: $("#quick-picker-title"),
-            quickPickerGrid: $("#quick-picker-grid")
+            quickPickerGrid: $("#quick-picker-grid"),
+            compare1: $("#compare-1"),
+            compare2: $("#compare-2"),
+            compare3: $("#compare-3"),
+            compareClear: $("#compare-clear"),
+            compareSummary: $("#compare-summary"),
+            compareTableWrap: $("#compare-table-wrap")
         };
 
         function configured() {
@@ -1418,6 +1537,10 @@
                 if (event.target === els.sheet) closeRecipeSheet();
             });
             els.notesArea.addEventListener("input", onNotesInput);
+            [els.compare1, els.compare2, els.compare3].forEach((node, index) => {
+                node.addEventListener("change", () => setCompareSlot(index, node.value));
+            });
+            els.compareClear.addEventListener("click", clearComparison);
         }
 
         function loadNotes() {
@@ -1445,6 +1568,9 @@
             if (name === "editor" && !$("#recipe-id").value) {
                 prepareNewRecipe(false);
             }
+            if (name === "compare") {
+                renderComparison();
+            }
             closeQuickPicker();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
@@ -1453,6 +1579,7 @@
             normalizeSortOrder();
             renderStats();
             renderRecipes();
+            renderComparison();
         }
 
         function renderStats() {
@@ -1524,6 +1651,7 @@
                                 <div class="menu-dropdown" data-menu="${id}">
                                     <button type="button" data-move-up="${id}">⬆️</button>
                                     <button type="button" data-move-down="${id}">⬇️</button>
+                                    <button type="button" data-duplicate="${id}">Dupliquer</button>
                                     <button type="button" data-delete="${id}">Supprimer</button>
                                 </div>
                             </div>
@@ -1599,6 +1727,18 @@
                 event.preventDefault();
                 event.stopPropagation();
                 toggleMenu(menuToggle.dataset.menuToggle);
+                return;
+            }
+
+            const duplicateButton = event.target.closest("[data-duplicate]");
+            if (duplicateButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                duplicateRecipe(duplicateButton.dataset.duplicate).catch((error) => {
+                    console.error(error);
+                    alert(`Erreur duplication: ${error.message || "inconnue"}`);
+                });
                 return;
             }
 
@@ -2205,6 +2345,42 @@
             await saveOrder().catch((error) => console.error(error));
         }
 
+        async function duplicateRecipe(id) {
+            const source = state.recipes.find((recipe) => String(recipe.id) === String(id));
+            if (!source) return;
+
+            const duplicate = {
+                ...source,
+                id: createId(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                sort_order: 0,
+                name: buildDuplicateName(source.name),
+                preset: "",
+                image_urls: [...(source.image_urls || [])]
+            };
+
+            await upsertRecipe(duplicate);
+
+            state.recipes.unshift(duplicate);
+            normalizeSortOrder();
+            persistLocal();
+            renderAll();
+            await saveOrder().catch((error) => console.error(error));
+        }
+
+        function buildDuplicateName(name) {
+            const base = String(name || "Recette").trim() || "Recette";
+            const names = new Set(state.recipes.map((recipe) => String(recipe.name || "").trim()));
+            let next = `${base} (copie)`;
+            if (!names.has(next)) return next;
+            let index = 2;
+            while (names.has(`${base} (copie ${index})`)) {
+                index += 1;
+            }
+            return `${base} (copie ${index})`;
+        }
+
         async function uploadSelectedImages() {
             setUploadStatus("", "");
 
@@ -2408,6 +2584,88 @@
                 return !value || String(value).trim() === "0";
             }
             return !String(value || "").trim();
+        }
+
+        function renderComparison() {
+            const available = visibleRecipes();
+            sanitizeCompareSelection(available);
+            renderCompareSelects(available);
+
+            const selected = comparedRecipes();
+            if (!selected.length) {
+                els.compareSummary.textContent = "Choisis jusqu'a 3 recettes a comparer.";
+                els.compareTableWrap.innerHTML = '<div class="empty">Selectionne au moins 1 recette.</div>';
+                return;
+            }
+
+            els.compareSummary.textContent = `${selected.length} recette${selected.length > 1 ? "s" : ""} selectionnee${selected.length > 1 ? "s" : ""}.`;
+
+            const head = selected.map((recipe) => `<th>${escapeHtml(recipe.name || "Sans nom")}</th>`).join("");
+            const rows = COMPARE_FIELDS.map((field) => {
+                const values = selected.map((recipe) => formatCompareField(field.key, recipe));
+                const normalized = values.map((value) => String(value || "").trim());
+                const same = normalized.every((value) => value === normalized[0]);
+                return `<tr class="${same ? "same" : "diff"}"><th>${escapeHtml(field.label)}</th>${values.map((value) => `<td>${escapeHtml(value || "-")}</td>`).join("")}</tr>`;
+            }).join("");
+
+            els.compareTableWrap.innerHTML = `
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Parametre</th>
+                            ${head}
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+        }
+
+        function renderCompareSelects(availableRecipes) {
+            const nodes = [els.compare1, els.compare2, els.compare3];
+            nodes.forEach((node, index) => {
+                const current = String(state.compareIds[index] || "");
+                const blocked = new Set(state.compareIds.filter((id, idIndex) => idIndex !== index && id));
+                const options = availableRecipes.filter((recipe) => !blocked.has(String(recipe.id)) || String(recipe.id) === current);
+                node.innerHTML = [
+                    '<option value="">Aucune</option>',
+                    ...options.map((recipe) => `<option value="${escapeAttr(recipe.id)}" ${String(recipe.id) === current ? "selected" : ""}>${escapeHtml(recipe.name || "Sans nom")}</option>`)
+                ].join("");
+            });
+        }
+
+        function sanitizeCompareSelection(availableRecipes) {
+            const existing = new Set(availableRecipes.map((recipe) => String(recipe.id)));
+            const seen = new Set();
+            state.compareIds = state.compareIds.map((id) => {
+                const safe = String(id || "");
+                if (!safe || !existing.has(safe) || seen.has(safe)) return "";
+                seen.add(safe);
+                return safe;
+            });
+        }
+
+        function comparedRecipes() {
+            return state.compareIds
+                .map((id) => state.recipes.find((recipe) => String(recipe.id) === String(id)))
+                .filter(Boolean);
+        }
+
+        function setCompareSlot(index, value) {
+            state.compareIds[index] = String(value || "");
+            sanitizeCompareSelection(visibleRecipes());
+            renderComparison();
+        }
+
+        function clearComparison() {
+            state.compareIds = ["", "", ""];
+            renderComparison();
+        }
+
+        function formatCompareField(field, recipe) {
+            const raw = recipe[field];
+            if (field === "rating") return toStars(raw);
+            return String(raw || "-");
         }
 
         function persistLocal() {
