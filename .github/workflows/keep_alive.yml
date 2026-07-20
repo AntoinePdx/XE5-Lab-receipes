@@ -2,16 +2,42 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Run at midnight (0 0 * *) on Sunday (0) and Friday(5)
-    - cron: '0 0 * * 0,5'
-  workflow_dispatch:
+    # S'exécute à minuit tous les 2 jours
+    - cron: '0 0 */2 * *'
+  workflow_dispatch: # Permet de le lancer à la main
 
 jobs:
-  ping:
+  ping_and_commit:
     runs-on: ubuntu-latest
+    
+    # Étape CRUCIALE : Donne le droit au script d'écrire et de push sur ton dépôt
+    permissions:
+      contents: write
+
     steps:
+      # 1. Récupère le code du dépôt pour pouvoir le modifier
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Envoie le ping à Supabase
       - name: Ping Supabase Database
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/film_recipes?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
+          curl -f -sS -X GET "https://aektdwxuviggksjiozme.supabase.co/rest/v1/trips?select=*" \
+          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3Rkd3h1dmlnZ2tzamlvem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Njk4MzQsImV4cCI6MjA5NDQ0NTgzNH0.ciPfHFmlT1Ok9OVWciw98u_8JW_bGLvIpQi1jQ20Luw" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3Rkd3h1dmlnZ2tzamlvem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Njk4MzQsImV4cCI6MjA5NDQ0NTgzNH0.ciPfHFmlT1Ok9OVWciw98u_8JW_bGLvIpQi1jQ20Luw"
+
+      # 3. Met à jour la date et crée le commit pour feinter GitHub
+      - name: Keep GitHub active (Auto-commit)
+        run: |
+          # Écrit la date du jour dans un fichier log
+          date > last_ping.txt
+          
+          # Configure l'identité du robot Git
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # Ajoute le fichier et crée le commit
+          git add last_ping.txt
+          
+          # Ne commit et ne push que s'il y a une modification réelle
+          git diff-index --quiet HEAD || (git commit -m "chore: update supabase ping timestamp [skip ci]" && git push)
