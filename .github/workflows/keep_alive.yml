@@ -22,9 +22,9 @@ jobs:
       # 2. Envoie le ping à Supabase
       - name: Ping Supabase Database
         run: |
-          curl -f -sS -X GET "https://aektdwxuviggksjiozme.supabase.co/rest/v1/film_recipes?select=*" \
-          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3Rkd3h1dmlnZ2tzamlvem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Njk4MzQsImV4cCI6MjA5NDQ0NTgzNH0.ciPfHFmlT1Ok9OVWciw98u_8JW_bGLvIpQi1jQ20Luw" \
-          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3Rkd3h1dmlnZ2tzamlvem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Njk4MzQsImV4cCI6MjA5NDQ0NTgzNH0.ciPfHFmlT1Ok9OVWciw98u_8JW_bGLvIpQi1jQ20Luw"
+          curl -f -sS -X GET "${{ secrets.SUPABASE_URL }}" \
+          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
 
       # 3. Met à jour la date et crée le commit pour feinter GitHub
       - name: Keep GitHub active (Auto-commit)
