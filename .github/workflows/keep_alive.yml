@@ -19,10 +19,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Envoie le ping à Supabase
+            # 2. Envoie un ping réel à la base de données
       - name: Ping Supabase Database
         run: |
-          curl -f -sS -X GET "${{ secrets.SUPABASE_URL }}" \
+          curl -f -sS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/film_recipes?select=*&limit=1" \
           -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
 
