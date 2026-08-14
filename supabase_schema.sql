@@ -92,6 +92,8 @@ returns trigger
 language plpgsql
 as $$
 begin
+    -- Same slot names (FS1/FS2/FS3) can exist in photo and video, but not twice
+    -- within the same mode; the mode is the namespace for uniqueness.
     if new.preset is null or new.preset = '' then
         return new;
     end if;
