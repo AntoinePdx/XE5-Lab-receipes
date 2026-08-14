@@ -117,6 +117,40 @@
             gap: 8px;
         }
 
+        .mode-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 36px;
+            border: 1px solid rgba(32, 27, 23, 0.12);
+            border-radius: 999px;
+            background: rgba(255, 250, 240, 0.7);
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0;
+            transition: border-color 180ms ease, background 180ms ease;
+        }
+
+        .mode-switch:hover {
+            border-color: rgba(32, 27, 23, 0.2);
+            background: rgba(255, 250, 240, 0.9);
+        }
+
+        .mode-switch svg {
+            width: 18px;
+            height: 18px;
+            position: absolute;
+            transition: opacity 180ms ease, transform 180ms ease;
+        }
+
+        .mode-switch .mode-icon-photo { opacity: 1; transform: scale(1); }
+        .mode-switch .mode-icon-video { opacity: 0; transform: scale(0.8); }
+
+        body.video-mode .mode-switch .mode-icon-photo { opacity: 0; transform: scale(0.8); }
+        body.video-mode .mode-switch .mode-icon-video { opacity: 1; transform: scale(1); }
+
         .sync-pill, .stat-pill {
             border: 1px solid var(--line);
             border-radius: 999px;
@@ -151,6 +185,16 @@
         .section-head span { color: var(--muted); font-size: 0.78rem; }
 
         .search-box, .form-grid { display: grid; gap: 10px; }
+
+        body.video-mode .photo-only,
+        body:not(.video-mode) .video-only {
+            display: none !important;
+        }
+
+        body.photo-mode .video-only,
+        body:not(.photo-mode) .photo-only {
+            display: none !important;
+        }
 
         .field input, .field select, .field textarea {
             width: 100%;
@@ -919,6 +963,17 @@
                 <strong>Fuji Recipes</strong>
             </div>
             <div class="top-meta">
+                <button class="mode-switch" type="button" id="mode-switch" aria-label="Basculer photo/video" aria-pressed="false">
+                    <svg class="mode-icon-photo" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h9A2.5 2.5 0 0 1 17 7.5v9A2.5 2.5 0 0 1 14.5 19h-9A2.5 2.5 0 0 1 3 16.5v-9Z"/>
+                        <path d="m17 9 4-2.5v11L17 15"/>
+                        <circle cx="9.5" cy="11.5" r="2.5"/>
+                    </svg>
+                    <svg class="mode-icon-video" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2.8" y="5.5" width="12.5" height="13" rx="2.2"/>
+                        <path d="m15.3 9 6-3.2v12.4L15.3 15"/>
+                    </svg>
+                </button>
                 <div class="stat-pill" id="count-total">0 recettes</div>
                 <div class="sync-pill" id="sync-status">local</div>
             </div>
@@ -981,41 +1036,43 @@
                         <textarea id="comment" placeholder="Zone libre"></textarea>
                     </div>
 
-                    <div class="two-col">
-                        <div class="field">
-                            <label for="simulation">Film</label>
-                            <select id="simulation"></select>
+                    <div class="photo-only">
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="simulation">Film</label>
+                                <select id="simulation"></select>
+                            </div>
+                            <div class="field">
+                                <label for="grain_effect">Grain</label>
+                                <select id="grain_effect"></select>
+                            </div>
                         </div>
-                        <div class="field">
-                            <label for="grain_effect">Grain</label>
-                            <select id="grain_effect"></select>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="grain_size">Grain Size</label>
+                                <select id="grain_size"></select>
+                                <div class="hint">Actif uniquement si Grain est Weak ou Strong.</div>
+                            </div>
+                            <div class="field">
+                                <label for="color_chrome_effect">Color Chrome FX</label>
+                                <select id="color_chrome_effect"></select>
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="color_chrome_fx_blue">Color Chrome Blue</label>
+                                <select id="color_chrome_fx_blue"></select>
+                            </div>
+                            <div class="field">
+                                <label for="smooth_skin_effect">Smooth Skin FX</label>
+                                <select id="smooth_skin_effect"></select>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="two-col">
-                        <div class="field">
-                            <label for="grain_size">Grain Size</label>
-                            <select id="grain_size"></select>
-                            <div class="hint">Actif uniquement si Grain est Weak ou Strong.</div>
-                        </div>
-                        <div class="field">
-                            <label for="color_chrome_effect">Color Chrome FX</label>
-                            <select id="color_chrome_effect"></select>
-                        </div>
-                    </div>
-
-                    <div class="two-col">
-                        <div class="field">
-                            <label for="color_chrome_fx_blue">Color Chrome Blue</label>
-                            <select id="color_chrome_fx_blue"></select>
-                        </div>
-                        <div class="field">
-                            <label for="smooth_skin_effect">Smooth Skin FX</label>
-                            <select id="smooth_skin_effect"></select>
-                        </div>
-                    </div>
-
-                    <div class="two-col">
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="white_balance_mode">White Balance</label>
                             <select id="white_balance_mode"></select>
@@ -1026,7 +1083,77 @@
                         </div>
                     </div>
 
-                    <div class="two-col">
+                    <div class="video-only">
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_film">Film</label>
+                                <select id="video_film"></select>
+                            </div>
+                            <div class="field">
+                                <label for="video_dynamic_range">Dynamic Range</label>
+                                <select id="video_dynamic_range"></select>
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_white_balance_mode">White Balance</label>
+                                <select id="video_white_balance_mode"></select>
+                            </div>
+                            <div class="field" id="video-white-balance-other-wrap" style="display:none;">
+                                <label for="video_white_balance_other">White Balance - Other</label>
+                                <input id="video_white_balance_other" placeholder="Ex: 4700K">
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_shift_red">Shift Red</label>
+                                <select id="video_shift_red"></select>
+                            </div>
+                            <div class="field">
+                                <label for="video_shift_blue">Shift Blue</label>
+                                <select id="video_shift_blue"></select>
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_highlights">Highlights</label>
+                                <select id="video_highlights"></select>
+                            </div>
+                            <div class="field">
+                                <label for="video_shadows">Shadows</label>
+                                <select id="video_shadows"></select>
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_color">Color</label>
+                                <select id="video_color"></select>
+                            </div>
+                            <div class="field">
+                                <label for="video_sharpness">Sharpness</label>
+                                <select id="video_sharpness"></select>
+                            </div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="field">
+                                <label for="video_high_iso_nr">ISO NR</label>
+                                <select id="video_high_iso_nr"></select>
+                            </div>
+                            <div class="field">
+                                <label for="video_film">N/A</label>
+                                <select id="video_film_drange" disabled>
+                                    <option value="">-</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="shift_red">Shift Red</label>
                             <select id="shift_red"></select>
@@ -1037,7 +1164,7 @@
                         </div>
                     </div>
 
-                    <div class="two-col">
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="dynamic_range">Dynamic Range</label>
                             <select id="dynamic_range"></select>
@@ -1048,7 +1175,7 @@
                         </div>
                     </div>
 
-                    <div class="two-col">
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="highlights">Highlights</label>
                             <select id="highlights"></select>
@@ -1059,7 +1186,7 @@
                         </div>
                     </div>
 
-                    <div class="two-col">
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="color">Color</label>
                             <select id="color"></select>
@@ -1070,7 +1197,7 @@
                         </div>
                     </div>
 
-                    <div class="two-col">
+                    <div class="two-col photo-only">
                         <div class="field">
                             <label for="high_iso_nr">High ISO NR</label>
                             <select id="high_iso_nr"></select>
@@ -1317,14 +1444,18 @@
         const LOCAL_KEY = "fuji-xe5-recipes-v3";
         const NOTES_KEY = "fuji-xe5-free-notes-v1";
 
-        const SLOT_OPTIONS = ["", "FS1", "FS2", "FS3", "C1", "C2", "C3", "C4", "C5", "C6", "C7"];
+        const PHOTO_SLOT_OPTIONS = ["", "FS1", "FS2", "FS3", "C1", "C2", "C3", "C4", "C5", "C6", "C7"];
+        const VIDEO_SLOT_OPTIONS = ["", "FS1", "FS2", "FS3"];
+        const SLOT_OPTIONS = PHOTO_SLOT_OPTIONS;
         const EXPO_OPTIONS = ["-2 to -3", "-1 to -2", "-1/3 to -1", "0", "1/3 to 1", "1 to 2", "2 to 3"];
         const FILM_OPTIONS = ["Provia", "Velvia", "Astia", "Classic Chrome", "Reala Ace", "Pro Neg Hi", "Pro Neg Std", "Classic Neg", "Nostalgic Neg", "Eterna", "Eterna Bleach Bypass", "Acros", "Monochrome", "Sepia"];
+        const VIDEO_FILM_OPTIONS = ["Eterna", "Eterna Bleach Bypass", "Classic Chrome", "Pro Neg Hi", "Pro Neg Std", "Velvia", "Astia", "Acros", "Monochrome"];
         const SIMPLE_LEVEL = ["Off", "Weak", "Strong"];
         const GRAIN_SIZE_OPTIONS = ["", "Small", "Large"];
         const WHITE_BALANCE_OPTIONS = ["Auto", "Auto ambiance prio", "Daylight", "Shade", "Auto white prio", "Other..."];
         const SHIFT_OPTIONS = Array.from({ length: 13 }, (_, i) => String(i - 6));
         const DYNAMIC_RANGE_OPTIONS = ["Auto", "DR100", "DR200", "DR400"];
+        const VIDEO_DYNAMIC_RANGE_OPTIONS = ["DR100", "DR200", "DR400", "DR800"];
         const D_RANGE_PRIO_OPTIONS = ["Off", "Weak", "Strong", "Auto"];
         const HALF_STEP_OPTIONS = rangeWithStep(-2, 4, 0.5);
         const COLOR_OPTIONS = rangeWithStep(-4, 4, 1);
@@ -1362,6 +1493,7 @@
 
         const state = {
             recipes: [],
+            mode: "photo",
             supabase: null,
             openMenuId: null,
             quickPicker: { open: false, recipeId: "", field: "" },
@@ -1412,10 +1544,15 @@
         }
 
         async function init() {
+            const savedMode = localStorage.getItem("fuji-xe5-recipe-mode-v1");
+            if (savedMode === "video" || savedMode === "photo") {
+                state.mode = savedMode;
+            }
             setupFormOptions();
             renderEditorPhotos();
             loadNotes();
             bindEvents();
+            applyRecipeMode();
             // Topbar scroll behaviour (sticky header is in-flow)
             attachTopbarScrollHandlers();
             await loadRecipes();
@@ -1484,7 +1621,8 @@
         }
 
         function setupFormOptions() {
-            fillSelect("preset", SLOT_OPTIONS, (value) => value || "Aucun slot");
+            const slotValues = currentSlotOptions();
+            fillSelect("preset", slotValues, (value) => value || "Aucun slot");
             fillSelect("rating", ["", "1", "2", "3", "4", "5"], (value) => value ? `${"★".repeat(Number(value))} (${value})` : "Non notee");
             fillSelect("expo_compensation", ["", ...EXPO_OPTIONS], (value) => value || "Non defini");
             fillSelect("simulation", ["", ...FILM_OPTIONS], (value) => value || "Non defini");
@@ -1494,6 +1632,7 @@
             fillSelect("color_chrome_fx_blue", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
             fillSelect("smooth_skin_effect", ["", ...SIMPLE_LEVEL], (value) => value || "Non defini");
             fillSelect("white_balance_mode", ["", ...WHITE_BALANCE_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_white_balance_mode", ["", ...WHITE_BALANCE_OPTIONS], (value) => value || "Non defini");
             fillSelect("shift_red", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
             fillSelect("shift_blue", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
             fillSelect("dynamic_range", ["", ...DYNAMIC_RANGE_OPTIONS], (value) => value || "Non defini");
@@ -1504,10 +1643,57 @@
             fillSelect("sharpness", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
             fillSelect("high_iso_nr", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
             fillSelect("clarity", ["", ...CLARITY_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_film", ["", ...VIDEO_FILM_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_shift_red", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_shift_blue", ["", ...SHIFT_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_dynamic_range", ["", ...VIDEO_DYNAMIC_RANGE_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_highlights", ["", ...HALF_STEP_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_shadows", ["", ...HALF_STEP_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_color", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_sharpness", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+            fillSelect("video_high_iso_nr", ["", ...COLOR_OPTIONS], (value) => value || "Non defini");
+        }
+
+        function currentSlotOptions() {
+            return state.mode === "video" ? VIDEO_SLOT_OPTIONS : PHOTO_SLOT_OPTIONS;
+        }
+
+        function toggleRecipeMode() {
+            state.mode = state.mode === "video" ? "photo" : "video";
+            localStorage.setItem("fuji-xe5-recipe-mode-v1", state.mode);
+            applyRecipeMode();
+            renderAll();
+            prepareNewRecipe(false);
+        }
+
+        function applyRecipeMode() {
+            const isVideo = state.mode === "video";
+            document.body.classList.toggle("video-mode", isVideo);
+            document.body.classList.toggle("photo-mode", !isVideo);
+            const modeSwitch = document.getElementById("mode-switch");
+            if (modeSwitch) {
+                modeSwitch.setAttribute("aria-pressed", String(isVideo));
+            }
+            const presetSelect = document.getElementById("preset");
+            if (presetSelect) {
+                const nextOptions = currentSlotOptions();
+                const currentValue = presetSelect.value;
+                presetSelect.innerHTML = nextOptions.map((value) => `<option value="${escapeAttr(value)}">${escapeHtml(value || "Aucun slot")}</option>`).join("");
+                if (nextOptions.includes(currentValue)) presetSelect.value = currentValue;
+                else presetSelect.value = "";
+            }
+        }
+
+        function syncVideoWhiteBalanceOtherState() {
+            const mode = $("#video_white_balance_mode").value;
+            const wrap = $("#video-white-balance-other-wrap");
+            wrap.style.display = mode === "Other..." ? "block" : "none";
+            if (mode !== "Other...") $("#video_white_balance_other").value = "";
         }
 
         function fillSelect(id, values, labelBuilder) {
             const node = document.getElementById(id);
+            if (!node) return;
             node.innerHTML = values.map((value) => `<option value="${escapeAttr(value)}">${escapeHtml(labelBuilder(value))}</option>`).join("");
         }
 
@@ -1515,6 +1701,11 @@
             document.querySelectorAll(".tab-btn").forEach((button) => {
                 button.addEventListener("click", () => showView(button.dataset.view));
             });
+
+            const modeSwitch = document.getElementById("mode-switch");
+            if (modeSwitch) {
+                modeSwitch.addEventListener("click", toggleRecipeMode);
+            }
 
             els.list.addEventListener("click", onRecipeAction);
             document.addEventListener("click", closeMenusOutside);
@@ -1527,6 +1718,7 @@
 
             $("#grain_effect").addEventListener("change", syncGrainSizeState);
             $("#white_balance_mode").addEventListener("change", syncWhiteBalanceOtherState);
+            $("#video_white_balance_mode").addEventListener("change", syncVideoWhiteBalanceOtherState);
             $("#sheet-close").addEventListener("click", closeRecipeSheet);
             els.sheetPhotos.addEventListener("click", onSheetPhotoAction);
             els.sheetAddPhotos.addEventListener("click", () => els.sheetPhotoFiles.click());
@@ -1583,16 +1775,19 @@
         }
 
         function renderStats() {
-            const total = state.recipes.length;
-            els.total.textContent = `${total} recette${total > 1 ? "s" : ""}`;
+            const total = state.recipes.filter((recipe) => (recipe.mode || "photo") === state.mode).length;
+            const suffix = state.mode === "video" ? "recette video" : "recette";
+            els.total.textContent = `${total} ${suffix}${total > 1 ? "s" : ""}`;
         }
 
         function visibleRecipes() {
-            return [...state.recipes].sort((a, b) => {
-                const slotDiff = slotPriority(a.preset) - slotPriority(b.preset);
-                if (slotDiff !== 0) return slotDiff;
-                return a.sort_order - b.sort_order;
-            });
+            return [...state.recipes]
+                .filter((recipe) => (recipe.mode || "photo") === state.mode)
+                .sort((a, b) => {
+                    const slotDiff = slotPriority(a.preset) - slotPriority(b.preset);
+                    if (slotDiff !== 0) return slotDiff;
+                    return a.sort_order - b.sort_order;
+                });
         }
 
         function slotPriority(slot) {
@@ -1614,7 +1809,8 @@
             if (els.results) els.results.textContent = "";
 
             if (!recipes.length) {
-                els.list.innerHTML = '<div class="empty">Aucune recette ne correspond a ces filtres.</div>';
+                const modeLabel = state.mode === "video" ? "vidéo" : "photo";
+                els.list.innerHTML = `<div class="empty">Aucune recette ${modeLabel} ne correspond a ces filtres.</div>`;
                 return;
             }
 
@@ -1873,7 +2069,7 @@
         }
 
         function quickOptions(field) {
-            if (field === "preset") return SLOT_OPTIONS;
+            if (field === "preset") return currentSlotOptions();
             if (field === "rating") return ["", "1", "2", "3", "4", "5"];
             if (field === "expo_compensation") return ["", ...EXPO_OPTIONS];
             return [""];
@@ -1996,8 +2192,10 @@
         }
 
         function renderRecipeSheet(recipe) {
+            const mode = recipe.mode || "photo";
             els.sheetTitle.innerHTML = `<input class="sheet-inline-input sheet-title-input" data-sheet-field="name" value="${escapeAttr(recipe.name || "")}" placeholder="Nom de la recette">`;
             els.sheetSub.innerHTML = `
+                <span>Mode: ${escapeHtml(mode === "video" ? "Video" : "Photo")}</span>
                 <span>Slot: ${escapeHtml(recipe.preset || "Aucun slot")}</span>
                 <span>Note: ${escapeHtml(toStars(recipe.rating))}</span>
                 <span>Expo: ${escapeHtml(recipe.expo_compensation || "Non defini")}</span>
@@ -2050,8 +2248,27 @@
         }
 
         function buildSheetEditorMarkup(recipe) {
+            const mode = recipe.mode || "photo";
+            const slotValues = currentSlotOptions();
+            if (mode === "video") {
+                return `<div class="sheet-field-grid">
+                    ${sheetSelect("preset", "Slot", slotValues, recipe.preset, (value) => value || "Aucun")}
+                    ${sheetSelect("rating", "Note", ["", "1", "2", "3", "4", "5"], recipe.rating, (value) => value ? `${"★".repeat(Number(value))} (${value})` : "Non notee")}
+                    ${sheetSelect("video_film", "Film", ["", ...VIDEO_FILM_OPTIONS], recipe.video_film || recipe.simulation, (value) => value || "Non defini")}
+                    ${sheetSelect("video_dynamic_range", "Dynamic Range", ["", ...VIDEO_DYNAMIC_RANGE_OPTIONS], recipe.video_dynamic_range || recipe.dynamic_range, (value) => value || "Non defini")}
+                    ${sheetInput("video_white_balance", "White Balance", recipe.video_white_balance || recipe.white_balance, "Ex: Auto, 4700K")}
+                    ${sheetSelect("video_shift_red", "Shift Red", ["", ...SHIFT_OPTIONS], recipe.video_shift_red || recipe.shift_red, (value) => value || "Non defini")}
+                    ${sheetSelect("video_shift_blue", "Shift Blue", ["", ...SHIFT_OPTIONS], recipe.video_shift_blue || recipe.shift_blue, (value) => value || "Non defini")}
+                    ${sheetSelect("video_highlights", "Highlights", ["", ...HALF_STEP_OPTIONS], recipe.video_highlights || recipe.highlights, (value) => value || "Non defini")}
+                    ${sheetSelect("video_shadows", "Shadows", ["", ...HALF_STEP_OPTIONS], recipe.video_shadows || recipe.shadows, (value) => value || "Non defini")}
+                    ${sheetSelect("video_color", "Color", ["", ...COLOR_OPTIONS], recipe.video_color || recipe.color, (value) => value || "Non defini")}
+                    ${sheetSelect("video_sharpness", "Sharpness", ["", ...COLOR_OPTIONS], recipe.video_sharpness || recipe.sharpness, (value) => value || "Non defini")}
+                    ${sheetSelect("video_high_iso_nr", "ISO NR", ["", ...COLOR_OPTIONS], recipe.video_high_iso_nr || recipe.high_iso_nr, (value) => value || "Non defini")}
+                </div>`;
+            }
+
             return `<div class="sheet-field-grid">
-                ${sheetSelect("preset", "Slot", SLOT_OPTIONS, recipe.preset, (value) => value || "Aucun")}
+                ${sheetSelect("preset", "Slot", slotValues, recipe.preset, (value) => value || "Aucun")}
                 ${sheetSelect("rating", "Note", ["", "1", "2", "3", "4", "5"], recipe.rating, (value) => value ? `${"★".repeat(Number(value))} (${value})` : "Non notee")}
                 ${sheetSelect("expo_compensation", "Expo", ["", ...EXPO_OPTIONS], recipe.expo_compensation, (value) => value || "Non definie")}
                 ${sheetSelect("simulation", "Film", ["", ...FILM_OPTIONS], recipe.simulation, (value) => value || "Non defini")}
@@ -2233,24 +2450,31 @@
             $("#favorite").value = "false";
             els.editorPhotoFiles.value = "";
             els.editorTitle.textContent = "Ajouter";
-            els.editorMode.textContent = "nouvelle recette";
+            els.editorMode.textContent = state.mode === "video" ? "nouvelle recette vidéo" : "nouvelle recette";
             setUploadStatus("", "");
             renderEditorPhotos();
             syncGrainSizeState();
             syncWhiteBalanceOtherState();
+            syncVideoWhiteBalanceOtherState();
             if (switchTab) showView("editor");
         }
 
         async function saveRecipe(event) {
             event.preventDefault();
             const id = ensureEditingId();
+            const mode = state.mode;
 
             const whiteBalanceMode = $("#white_balance_mode").value;
             const whiteBalance = whiteBalanceMode === "Other..."
                 ? $("#white_balance_other").value.trim()
                 : whiteBalanceMode;
 
-            if (whiteBalanceMode === "Other..." && !whiteBalance) {
+            const videoWhiteBalanceMode = $("#video_white_balance_mode").value;
+            const videoWhiteBalance = videoWhiteBalanceMode === "Other..."
+                ? $("#video_white_balance_other").value.trim()
+                : videoWhiteBalanceMode;
+
+            if ((mode === "photo" && whiteBalanceMode === "Other..." && !whiteBalance) || (mode === "video" && videoWhiteBalanceMode === "Other..." && !videoWhiteBalance)) {
                 alert("Saisis une valeur pour White Balance (Other).\nExemple: 4700K");
                 return;
             }
@@ -2258,33 +2482,44 @@
             const previous = state.recipes.find((item) => String(item.id) === String(id));
             const recipe = {
                 id,
+                mode,
                 created_at: previous?.created_at || new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                sort_order: previous?.sort_order ?? state.recipes.length,
+                sort_order: previous?.sort_order ?? state.recipes.filter((item) => (item.mode || "photo") === mode).length,
                 name: $("#name").value.trim(),
                 preset: $("#preset").value,
                 rating: $("#rating").value,
                 expo_compensation: $("#expo_compensation").value,
                 comment: $("#comment").value.trim(),
-                simulation: $("#simulation").value,
+                simulation: mode === "video" ? $("#video_film").value : $("#simulation").value,
                 grain_effect: $("#grain_effect").value,
                 grain_size: $("#grain_effect").value === "Off" ? "" : $("#grain_size").value,
                 color_chrome_effect: $("#color_chrome_effect").value,
                 color_chrome_fx_blue: $("#color_chrome_fx_blue").value,
                 smooth_skin_effect: $("#smooth_skin_effect").value,
-                white_balance: whiteBalance,
-                shift_red: $("#shift_red").value,
-                shift_blue: $("#shift_blue").value,
-                dynamic_range: $("#dynamic_range").value,
+                white_balance: mode === "video" ? videoWhiteBalance : whiteBalance,
+                shift_red: mode === "video" ? $("#video_shift_red").value : $("#shift_red").value,
+                shift_blue: mode === "video" ? $("#video_shift_blue").value : $("#shift_blue").value,
+                dynamic_range: mode === "video" ? $("#video_dynamic_range").value : $("#dynamic_range").value,
                 d_range_priority: $("#d_range_priority").value,
-                highlights: $("#highlights").value,
-                shadows: $("#shadows").value,
-                color: $("#color").value,
-                sharpness: $("#sharpness").value,
-                high_iso_nr: $("#high_iso_nr").value,
+                highlights: mode === "video" ? $("#video_highlights").value : $("#highlights").value,
+                shadows: mode === "video" ? $("#video_shadows").value : $("#shadows").value,
+                color: mode === "video" ? $("#video_color").value : $("#color").value,
+                sharpness: mode === "video" ? $("#video_sharpness").value : $("#sharpness").value,
+                high_iso_nr: mode === "video" ? $("#video_high_iso_nr").value : $("#high_iso_nr").value,
                 clarity: $("#clarity").value,
                 image_urls: splitImages($("#image_urls").value),
-                favorite: truthy($("#favorite").value)
+                favorite: truthy($("#favorite").value),
+                video_film: mode === "video" ? $("#video_film").value : "",
+                video_white_balance: mode === "video" ? videoWhiteBalance : "",
+                video_shift_red: mode === "video" ? $("#video_shift_red").value : "",
+                video_shift_blue: mode === "video" ? $("#video_shift_blue").value : "",
+                video_dynamic_range: mode === "video" ? $("#video_dynamic_range").value : "",
+                video_highlights: mode === "video" ? $("#video_highlights").value : "",
+                video_shadows: mode === "video" ? $("#video_shadows").value : "",
+                video_color: mode === "video" ? $("#video_color").value : "",
+                video_sharpness: mode === "video" ? $("#video_sharpness").value : "",
+                video_high_iso_nr: mode === "video" ? $("#video_high_iso_nr").value : ""
             };
 
             if (!recipe.name) {
@@ -2316,8 +2551,9 @@
         async function enforceUniquePresetSlot(recipe) {
             if (!recipe.preset) return;
 
+            const mode = recipe.mode || "photo";
             state.recipes.forEach((item) => {
-                if (String(item.id) !== String(recipe.id) && item.preset === recipe.preset) {
+                if (String(item.id) !== String(recipe.id) && (item.mode || "photo") === mode && item.preset === recipe.preset) {
                     item.preset = "";
                 }
             });
@@ -2328,6 +2564,7 @@
                 .from(SUPABASE_TABLE)
                 .update({ preset: "" })
                 .eq("preset", recipe.preset)
+                .eq("mode", mode)
                 .neq("id", recipe.id);
 
             if (error) throw error;
@@ -2508,15 +2745,18 @@
         }
 
         function normalizeRecipe(recipe) {
-            const normalizedFilm = normalizeFilm(recipe.simulation || "");
-            const normalizedWb = normalizeWhiteBalance(recipe.white_balance || "");
+            const normalizedMode = recipe.mode === "video" ? "video" : "photo";
+            const normalizedFilm = normalizeFilm(recipe.simulation || recipe.video_film || "");
+            const normalizedWb = normalizeWhiteBalance(recipe.white_balance || recipe.video_white_balance || "");
+            const slotValues = normalizedMode === "video" ? VIDEO_SLOT_OPTIONS : PHOTO_SLOT_OPTIONS;
             return {
                 id: String(recipe.id || createId()),
+                mode: normalizedMode,
                 created_at: recipe.created_at || new Date().toISOString(),
                 updated_at: recipe.updated_at || new Date().toISOString(),
                 sort_order: Number.isFinite(Number(recipe.sort_order)) ? Number(recipe.sort_order) : 0,
                 name: String(recipe.name || "").trim(),
-                preset: SLOT_OPTIONS.includes(recipe.preset) ? recipe.preset : "",
+                preset: slotValues.includes(recipe.preset) ? recipe.preset : "",
                 rating: String(normalizeRating(recipe.rating) || ""),
                 expo_compensation: EXPO_OPTIONS.includes(recipe.expo_compensation) ? recipe.expo_compensation : "",
                 comment: String(recipe.comment || "").trim(),
@@ -2527,18 +2767,28 @@
                 color_chrome_fx_blue: SIMPLE_LEVEL.includes(recipe.color_chrome_fx_blue) ? recipe.color_chrome_fx_blue : "",
                 smooth_skin_effect: SIMPLE_LEVEL.includes(recipe.smooth_skin_effect) ? recipe.smooth_skin_effect : "",
                 white_balance: normalizedWb,
-                shift_red: SHIFT_OPTIONS.includes(String(recipe.shift_red || "")) ? String(recipe.shift_red) : "",
-                shift_blue: SHIFT_OPTIONS.includes(String(recipe.shift_blue || "")) ? String(recipe.shift_blue) : "",
-                dynamic_range: DYNAMIC_RANGE_OPTIONS.includes(recipe.dynamic_range) ? recipe.dynamic_range : "",
+                shift_red: SHIFT_OPTIONS.includes(String(recipe.shift_red || recipe.video_shift_red || "")) ? String(recipe.shift_red || recipe.video_shift_red || "") : "",
+                shift_blue: SHIFT_OPTIONS.includes(String(recipe.shift_blue || recipe.video_shift_blue || "")) ? String(recipe.shift_blue || recipe.video_shift_blue || "") : "",
+                dynamic_range: (normalizedMode === "video" ? VIDEO_DYNAMIC_RANGE_OPTIONS : DYNAMIC_RANGE_OPTIONS).includes(recipe.dynamic_range || recipe.video_dynamic_range) ? (recipe.dynamic_range || recipe.video_dynamic_range) : "",
                 d_range_priority: D_RANGE_PRIO_OPTIONS.includes(recipe.d_range_priority) ? recipe.d_range_priority : "",
-                highlights: HALF_STEP_OPTIONS.includes(String(recipe.highlights || "")) ? String(recipe.highlights) : "",
-                shadows: HALF_STEP_OPTIONS.includes(String(recipe.shadows || "")) ? String(recipe.shadows) : "",
-                color: COLOR_OPTIONS.includes(String(recipe.color || "")) ? String(recipe.color) : "",
-                sharpness: COLOR_OPTIONS.includes(String(recipe.sharpness || "")) ? String(recipe.sharpness) : "",
-                high_iso_nr: COLOR_OPTIONS.includes(String(recipe.high_iso_nr || "")) ? String(recipe.high_iso_nr) : "",
-                clarity: CLARITY_OPTIONS.includes(String(recipe.clarity || "")) ? String(recipe.clarity) : "",
+                highlights: HALF_STEP_OPTIONS.includes(String(recipe.highlights || recipe.video_highlights || "")) ? String(recipe.highlights || recipe.video_highlights || "") : "",
+                shadows: HALF_STEP_OPTIONS.includes(String(recipe.shadows || recipe.video_shadows || "")) ? String(recipe.shadows || recipe.video_shadows || "") : "",
+                color: COLOR_OPTIONS.includes(String(recipe.color || recipe.video_color || "")) ? String(recipe.color || recipe.video_color || "") : "",
+                sharpness: COLOR_OPTIONS.includes(String(recipe.sharpness || recipe.video_sharpness || "")) ? String(recipe.sharpness || recipe.video_sharpness || "") : "",
+                high_iso_nr: COLOR_OPTIONS.includes(String(recipe.high_iso_nr || recipe.video_high_iso_nr || "")) ? String(recipe.high_iso_nr || recipe.video_high_iso_nr || "") : "",
+                clarity: CLARITY_OPTIONS.includes(String(recipe.clarity || "")) ? String(recipe.clarity || "") : "",
                 image_urls: splitImages(recipe.image_urls),
-                favorite: truthy(recipe.favorite)
+                favorite: truthy(recipe.favorite),
+                video_film: recipe.video_film || recipe.simulation || "",
+                video_white_balance: recipe.video_white_balance || recipe.white_balance || "",
+                video_shift_red: recipe.video_shift_red || recipe.shift_red || "",
+                video_shift_blue: recipe.video_shift_blue || recipe.shift_blue || "",
+                video_dynamic_range: recipe.video_dynamic_range || recipe.dynamic_range || "",
+                video_highlights: recipe.video_highlights || recipe.highlights || "",
+                video_shadows: recipe.video_shadows || recipe.shadows || "",
+                video_color: recipe.video_color || recipe.color || "",
+                video_sharpness: recipe.video_sharpness || recipe.sharpness || "",
+                video_high_iso_nr: recipe.video_high_iso_nr || recipe.high_iso_nr || ""
             };
         }
 

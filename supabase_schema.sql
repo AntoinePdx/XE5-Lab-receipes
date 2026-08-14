@@ -7,6 +7,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.film_recipes (
     id text primary key default gen_random_uuid()::text,
+    mode text not null default 'photo' check (mode in ('photo', 'video')),
     name text not null,
     sort_order integer not null default 0,
     simulation text,
@@ -32,14 +33,40 @@ create table if not exists public.film_recipes (
     rating text,
     favorite boolean not null default false,
     image_urls text[] not null default '{}',
+    video_film text,
+    video_white_balance text,
+    video_shift_red text,
+    video_shift_blue text,
+    video_dynamic_range text,
+    video_highlights text,
+    video_shadows text,
+    video_color text,
+    video_sharpness text,
+    video_high_iso_nr text,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
 
 alter table public.film_recipes
+add column if not exists mode text not null default 'photo' check (mode in ('photo', 'video'));
+
+alter table public.film_recipes
 add column if not exists sort_order integer not null default 0;
 
+alter table public.film_recipes
+add column if not exists video_film text,
+add column if not exists video_white_balance text,
+add column if not exists video_shift_red text,
+add column if not exists video_shift_blue text,
+add column if not exists video_dynamic_range text,
+add column if not exists video_highlights text,
+add column if not exists video_shadows text,
+add column if not exists video_color text,
+add column if not exists video_sharpness text,
+add column if not exists video_high_iso_nr text;
+
 create index if not exists film_recipes_name_idx on public.film_recipes (name);
+create index if not exists film_recipes_mode_idx on public.film_recipes (mode);
 create index if not exists film_recipes_simulation_idx on public.film_recipes (simulation);
 create index if not exists film_recipes_favorite_idx on public.film_recipes (favorite);
 create index if not exists film_recipes_sort_order_idx on public.film_recipes (sort_order);
@@ -65,19 +92,31 @@ returns trigger
 language plpgsql
 as $$
 begin
-    if new.preset in ('FS1', 'FS2', 'FS3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7') then
+    if new.preset is null or new.preset = '' then
+        return new;
+    end if;
+
+    if new.mode = 'photo' and new.preset in ('FS1', 'FS2', 'FS3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7') then
         update public.film_recipes
         set preset = ''
         where preset = new.preset
+          and mode = 'photo'
+          and id <> new.id;
+    elsif new.mode = 'video' and new.preset in ('FS1', 'FS2', 'FS3') then
+        update public.film_recipes
+        set preset = ''
+        where preset = new.preset
+          and mode = 'video'
           and id <> new.id;
     end if;
+
     return new;
 end;
 $$;
 
 drop trigger if exists film_recipes_unique_preset_slot on public.film_recipes;
 create trigger film_recipes_unique_preset_slot
-before insert or update of preset on public.film_recipes
+before insert or update of preset, mode on public.film_recipes
 for each row
 execute function public.clear_duplicate_preset_slot();
 
