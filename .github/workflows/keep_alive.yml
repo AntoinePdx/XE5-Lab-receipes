@@ -2,42 +2,63 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # S'exécute à minuit tous les 2 jours
-    - cron: '0 0 */2 * *'
+    # Tous les jours à 06:17 UTC (minute non ronde = moins de retards côté GitHub)
+    - cron: '17 6 * * *'
   workflow_dispatch: # Permet de le lancer à la main
 
 jobs:
   ping_and_commit:
     runs-on: ubuntu-latest
-    
-    # Étape CRUCIALE : Donne le droit au script d'écrire et de push sur ton dépôt
+
+    # Donne le droit au script d'écrire et de push sur le dépôt
     permissions:
       contents: write
 
     steps:
-      # 1. Récupère le code du dépôt pour pouvoir le modifier
       - name: Checkout repository
         uses: actions/checkout@v4
 
-            # 2. Envoie un ping réel à la base de données
+      # Écriture réelle en base (fonction keep_alive) + lecture de la table principale.
+      # Réessaie plusieurs fois pour absorber les erreurs réseau passagères.
       - name: Ping Supabase Database
+        id: ping
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          curl -f -sS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/film_recipes?select=*&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}"
+          set -u
+          for attempt in 1 2 3 4 5; do
+            echo "Tentative $attempt..."
+            if curl -f -sS --max-time 30 -X POST "$SUPABASE_URL/rest/v1/rpc/keep_alive" \
+                 -H "apikey: $SUPABASE_KEY" \
+                 -H "Authorization: Bearer $SUPABASE_KEY" \
+                 -H "Content-Type: application/json" \
+                 -d '{}' \
+               && curl -f -sS --max-time 30 "$SUPABASE_URL/rest/v1/film_recipes?select=id&limit=1" \
+                 -H "apikey: $SUPABASE_KEY" \
+                 -H "Authorization: Bearer $SUPABASE_KEY" -o /dev/null; then
+              echo ""
+              echo "Ping OK"
+              exit 0
+            fi
+            sleep $((attempt * 30))
+          done
+          echo "::error::Supabase ne répond pas : le projet est peut-être en pause. Restaure-le depuis le dashboard."
+          exit 1
 
-      # 3. Met à jour la date et crée le commit pour feinter GitHub
+      # Commit même si le ping échoue : sinon GitHub désactive les workflows
+      # planifiés après 60 jours sans activité sur le dépôt.
       - name: Keep GitHub active (Auto-commit)
+        if: always()
         run: |
-          # Écrit la date du jour dans un fichier log
-          date > last_ping.txt
-          
-          # Configure l'identité du robot Git
+          echo "$(date -u) ping=${{ steps.ping.outcome }}" > last_ping.txt
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          
-          # Ajoute le fichier et crée le commit
           git add last_ping.txt
-          
-          # Ne commit et ne push que s'il y a une modification réelle
           git diff-index --quiet HEAD || (git commit -m "chore: update supabase ping timestamp [skip ci]" && git push)
+
+      # Fait échouer le run (=> email de GitHub) si le ping a raté
+      - name: Report ping failure
+        if: steps.ping.outcome == 'failure'
+        run: exit 1
